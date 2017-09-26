@@ -1,0 +1,109 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.weather</groupId>
+  <artifactId>weather-api-consumer</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  
+  <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.6.RELEASE</version>
+   </parent>
+   
+   <properties>
+		<jdk.version>1.7</jdk.version>
+	</properties>
+   
+   <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        
+		<!-- https://mvnrepository.com/artifact/oracle/ojdbc -->
+		<!-- https://mvnrepository.com/artifact/oracle/ojdbc6 -->
+		<dependency>
+		    <groupId>oracle</groupId>
+		    <artifactId>ojdbc6</artifactId>
+		    <version>11.2.0.3</version>
+		</dependency>
+    </dependencies>
+    
+    <build>
+    	<plugins>
+		<!-- download source code in Eclipse, best practice -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-eclipse-plugin</artifactId>
+			<version>2.9</version>
+			<configuration>
+				<downloadSources>true</downloadSources>
+				<downloadJavadocs>false</downloadJavadocs>
+			</configuration>
+		</plugin>
+		
+		<!-- Set a compiler level -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>2.3.2</version>
+			<configuration>
+				<source>${jdk.version}</source>
+				<target>${jdk.version}</target>
+			</configuration>
+		</plugin>
+		
+		<!-- Make this jar executable -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<configuration>
+			  <archive>
+			    <manifest>
+				<addClasspath>true</addClasspath>
+				<mainClass>co.com.gana.cim.main.Application</mainClass>
+				<classpathPrefix>dependency-jars/</classpathPrefix>
+			    </manifest>
+			  </archive>
+			</configuration>
+		</plugin>
+		
+		<!-- Copy project dependency -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-dependency-plugin</artifactId>
+			<version>2.5.1</version>
+			<executions>
+			  <execution>
+				<id>copy-dependencies</id>
+				<phase>package</phase>
+				<goals>
+					<goal>copy-dependencies</goal>
+				</goals>
+				<configuration>
+				  <!-- exclude junit, we need runtime dependency only -->
+				  <includeScope>runtime</includeScope>
+				  <outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+				</configuration>
+			  </execution>
+			</executions>
+		</plugin>
+         <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>  <!-- added -->
+                	<layout>ZIP</layout> <!-- to use PropertiesLaunchar -->
+            	</configuration>
+         </plugin>
+       </plugins>
+    </build>
+   
+</project>
