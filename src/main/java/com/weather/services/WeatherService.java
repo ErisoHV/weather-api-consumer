@@ -12,7 +12,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.weather.model.CurrentWeatherStatus;
-import com.weather.model.WeatherLocation;
+import com.weather.model.Location;
 
 public abstract class WeatherService {
 
@@ -20,7 +20,13 @@ public abstract class WeatherService {
 	public static final String VEL_SYMBOL = "km/h";
 	public static final String PREC_SYMBOL = "mm";
 
-	protected ResponseEntity<List> getResponseEntity(String url, Map<String, String> params){
+	/**
+	 * Return a generic ResponseEntity List from any service
+	 * @param url Service API URL
+	 * @param params Query parameters
+	 * @return ResponseEntity List
+	 */
+	protected ResponseEntity<List> getResponseEntityList(String url, Map<String, String> params){
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
 		if (params != null){
 			for (Entry<String, String> entry : params.entrySet()){
@@ -29,7 +35,6 @@ public abstract class WeatherService {
 		}
 		
 		UriComponents urlBuilded = builder.build().encode();
-		System.err.println(urlBuilded.toUriString());
 		RestTemplate template  = new RestTemplate();
 		try {
 			ResponseEntity<List> map = template.getForEntity(urlBuilded.toUriString(), List.class);
@@ -44,11 +49,45 @@ public abstract class WeatherService {
 		}
 		return null;
 	}
+	
+	/**
+	 * Return a generic ResponseEntity Map from any service
+	 * @param url Service API URL
+	 * @param params Query parameters
+	 * @return ResponseEntity Map
+	 */
+	protected ResponseEntity<Map> getResponseEntityMap(String url, Map<String, String> params){
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
+		if (params != null){
+			for (Entry<String, String> entry : params.entrySet()){
+				builder = builder.queryParam(entry.getKey() , entry.getValue());
+			}
+		}
+		
+		UriComponents urlBuilded = builder.build().encode();
+		RestTemplate template  = new RestTemplate();
+		try {
+			ResponseEntity<Map> map = template.getForEntity(urlBuilded.toUriString(), Map.class);
+				if (map.getStatusCode().equals(HttpStatus.OK)){
+					return map;
+				}
+				else{
+					System.err.println("Location not found");
+				}
+		} catch (RestClientException e) {
+			System.err.println("Rest Client exception, check API key and query params. Response = " + e.getMessage());
+		}
+		return null;
+	}
 
-	public abstract WeatherLocation getLocationDataByName(String siteName);
+	public abstract List<Location> getLocationsDataByName(String siteName);
 	
-	public abstract WeatherLocation getSiteDataByGeoposition(double lat, double lon);
+	public abstract Location getLocationDataByGeoposition(double lat, double lon);
 	
-	public abstract CurrentWeatherStatus getWeather(WeatherLocation site);
+	public abstract CurrentWeatherStatus getWeather(Location site);
+	
+	protected abstract Location responseToLocation(Map<String, Object> element);
+	
+	protected abstract CurrentWeatherStatus responseToWeather(Map<String, Object> element, Location loc);
 	
 }

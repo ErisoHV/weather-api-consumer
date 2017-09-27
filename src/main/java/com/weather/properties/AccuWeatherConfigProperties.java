@@ -13,8 +13,11 @@ public class AccuWeatherConfigProperties {
 	@Value("${accuweather.api.key}")
 	private String accuweatherKey;
 	
-	@Value("${accuweather.url.geoposition}")
+	@Value("${accuweather.url.searchGeoposition}")
 	private String geopositionURL;
+	
+	@Value("${accuweather.url.searchText}")
+	private String textURL;
 	
 	@Value("${accuweather.url.weather}")
 	private String weatherURL;
@@ -41,6 +44,14 @@ public class AccuWeatherConfigProperties {
 
 	public void setGeopositionURL(String geopositionURL) {
 		this.geopositionURL = geopositionURL;
+	}
+
+	public String getTextURL() {
+		return textURL;
+	}
+
+	public void setTextURL(String textURL) {
+		this.textURL = textURL;
 	}
 
 	public String getWeatherURL() {
