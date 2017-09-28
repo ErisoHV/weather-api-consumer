@@ -19,22 +19,124 @@ public abstract class WeatherService {
 	public static final String TEMP_SYMBOL = "&deg;";
 	public static final String VEL_SYMBOL = "km/h";
 	public static final String PREC_SYMBOL = "mm";
+	
+	private String apiKey;
+	private String apiParamName;
+	private boolean isByApiQueryParam = true;
+	
+	protected WeatherService(){
+		
+	}
+	
+	protected WeatherService(String apiKey, String apiParamName) {
+		this.apiKey = apiKey;
+		this.apiParamName = apiParamName;
+	}
+	
+	protected String getApiKey() {
+		return apiKey;
+	}
 
+	protected void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
+	
+	protected String getApiParamName() {
+		return apiParamName;
+	}
+
+	protected void setApiParamName(String apiParamName) {
+		this.apiParamName = apiParamName;
+	}
+	
+	protected boolean isByApiQueryParam() {
+		return isByApiQueryParam;
+	}
+
+	protected void setByApiQueryParam(boolean isByApiQueryParam) {
+		this.isByApiQueryParam = isByApiQueryParam;
+	}
+
+	protected boolean isValidKey(){
+		return this.getApiKey() != null && !this.getApiKey().isEmpty();
+	}
+
+	protected boolean isValidParamKey(){
+		return this.getApiParamName() != null && !this.getApiParamName().isEmpty();
+	}
+
+	protected void validateApiQueryParam(){
+		if (!isValidKey()){
+			throw new IllegalArgumentException("apiKey cannot be null or empty. Use setKey");
+		}
+		if (isByApiQueryParam){	
+			if (!isValidParamKey()){
+				throw new IllegalArgumentException("paramKey name cannot be null or empty. Use build()");
+			}
+		}
+
+	}
+
+	private void addURLParameters(UriComponentsBuilder builder, Map<String, String> params){
+		if (params != null){
+			for (Entry<String, String> entry : params.entrySet()){
+				builder = builder.queryParam(entry.getKey() , entry.getValue());
+			}
+		}
+	}
+	
+	private void addPathParameters(UriComponentsBuilder builder, List<String> params){
+		if (params != null){
+			for (String entry : params){
+				builder = builder.path(entry).path("/");
+			}
+		}
+	}
+	
+	private UriComponents buildURLParameters(String url, Map<String, String> urlParams, List<String> pathParams){
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
+		if (isByApiQueryParam){
+			builder = builder.queryParam(apiParamName, apiKey);
+		} else{
+			builder = builder.path(apiKey).path("/");
+		}
+		addPathParameters(builder, pathParams);
+		addURLParameters(builder, urlParams);
+		return builder.build().encode();
+	}
+	
 	/**
 	 * Return a generic ResponseEntity List from any service
 	 * @param url Service API URL
 	 * @param params Query parameters
 	 * @return ResponseEntity List
 	 */
-	protected ResponseEntity<List> getResponseEntityList(String url, Map<String, String> params){
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		if (params != null){
-			for (Entry<String, String> entry : params.entrySet()){
-				builder = builder.queryParam(entry.getKey() , entry.getValue());
-			}
-		}
-		
-		UriComponents urlBuilded = builder.build().encode();
+	@SuppressWarnings("rawtypes")
+	protected ResponseEntity<List> getAPIWeatherResponseEntityList(String url, Map<String, String> params){
+		UriComponents urlBuilded = buildURLParameters(url, params, null);
+		return getAPIWeatherResponseEntityList(urlBuilded);
+	}
+	
+	/**
+	 *Return a generic ResponseEntity List from any service
+	 * @param url Service API URL
+	 * @param urlParams Query parameters
+	 * @param pathParams List
+	 * @return ResponseEntity
+	 */
+	@SuppressWarnings("rawtypes")
+	protected ResponseEntity<List> getAPIWeatherResponseEntityList(String url, Map<String, String> urlParams, List<String> pathParams){
+		UriComponents urlBuilded = buildURLParameters(url, urlParams, pathParams);
+		return getAPIWeatherResponseEntityList(urlBuilded);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected ResponseEntity<List> getAPIWeatherResponseEntityList(String url, List<String> pathParams){
+		UriComponents urlBuilded = buildURLParameters(url, null, pathParams);
+		return getAPIWeatherResponseEntityList(urlBuilded);
+	}
+	
+	private ResponseEntity<List> getAPIWeatherResponseEntityList(UriComponents urlBuilded){
 		RestTemplate template  = new RestTemplate();
 		try {
 			ResponseEntity<List> map = template.getForEntity(urlBuilded.toUriString(), List.class);
@@ -42,7 +144,8 @@ public abstract class WeatherService {
 					return map;
 				}
 				else{
-					System.err.println("Location not found");
+					System.err.println("[WeatherService -> getResponseEntityList] Error (" + map.getStatusCodeValue() + ") " +
+							map.getBody());
 				}
 		} catch (RestClientException e) {
 			System.err.println("Rest Client exception, check API key and query params. Response = " + e.getMessage());
@@ -56,15 +159,31 @@ public abstract class WeatherService {
 	 * @param params Query parameters
 	 * @return ResponseEntity Map
 	 */
-	protected ResponseEntity<Map> getResponseEntityMap(String url, Map<String, String> params){
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		if (params != null){
-			for (Entry<String, String> entry : params.entrySet()){
-				builder = builder.queryParam(entry.getKey() , entry.getValue());
-			}
-		}
-		
-		UriComponents urlBuilded = builder.build().encode();
+	@SuppressWarnings("rawtypes")
+	protected ResponseEntity<Map> getAPIWeatherResponseEntityMap(String url, Map<String, String> params){
+		UriComponents urlBuilded = buildURLParameters(url, params, null);
+		return getAPIWeatherResponseEntityMap(urlBuilded);
+	}
+	
+	/**
+	 * Return a generic ResponseEntity Map from any service
+	 * @param url Service API URL
+	 * @param params Query parameters
+	 * @return ResponseEntity Map
+	 */
+	@SuppressWarnings("rawtypes")
+	protected ResponseEntity<Map> getAPIWeatherResponseEntityMap(String url, Map<String, String> urlParams, List<String> pathParams){
+		UriComponents urlBuilded = buildURLParameters(url, urlParams, pathParams);
+		return getAPIWeatherResponseEntityMap(urlBuilded);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected ResponseEntity<Map> getAPIWeatherResponseEntityMap(String url, List<String> pathParams){
+		UriComponents urlBuilded = buildURLParameters(url, null, pathParams);
+		return getAPIWeatherResponseEntityMap(urlBuilded);
+	}
+	
+	private ResponseEntity<Map> getAPIWeatherResponseEntityMap(UriComponents urlBuilded){
 		RestTemplate template  = new RestTemplate();
 		try {
 			ResponseEntity<Map> map = template.getForEntity(urlBuilded.toUriString(), Map.class);
@@ -72,7 +191,8 @@ public abstract class WeatherService {
 					return map;
 				}
 				else{
-					System.err.println("Location not found");
+					System.err.println("[WeatherService -> getResponseEntityMap] Error (" + map.getStatusCodeValue() + ") " +
+							map.getBody());
 				}
 		} catch (RestClientException e) {
 			System.err.println("Rest Client exception, check API key and query params. Response = " + e.getMessage());

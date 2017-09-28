@@ -100,4 +100,16 @@ public class Location {
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
+
+	@Override
+	public String toString() {
+		return "Location [locationID=" + locationID + ", name=" + name
+				+ ", localizedName=" + localizedName
+				+ ", administrativeAreaName=" + administrativeAreaName
+				+ ", locationCountryName=" + locationCountryName
+				+ ", locationRegionName=" + locationRegionName
+				+ ", serviceKey=" + serviceKey + ", abbreviation="
+				+ abbreviation + ", locationType=" + locationType
+				+ ", longitude=" + longitude + ", latitude=" + latitude + "]";
+	}
 }

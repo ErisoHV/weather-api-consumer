@@ -7,14 +7,12 @@ public class CurrentWeatherStatus {
 	private Location location;
 	private Timestamp epochTime;
 	private String weatherDescription;
-	private int weatherIcon;
+	private String weatherIcon;
 	private double temperature;
 	private double realFeelTemperature;
 	private String windDirection;
 	private double windSpeed;
 	private double precipitation;
-	
-	
 	
 	public Location getLocation() {
 		return location;
@@ -40,11 +38,11 @@ public class CurrentWeatherStatus {
 		this.weatherDescription = weatherDescription;
 	}
 
-	public int getWeatherIcon() {
+	public String getWeatherIcon() {
 		return weatherIcon;
 	}
 
-	public void setWeatherIcon(int weatherIcon) {
+	public void setWeatherIcon(String weatherIcon) {
 		this.weatherIcon = weatherIcon;
 	}
 
@@ -87,4 +85,15 @@ public class CurrentWeatherStatus {
 	public void setPrecipitation(double precipitation) {
 		this.precipitation = precipitation;
 	}
+	
+	@Override
+	public String toString() {
+		return "CurrentWeatherStatus [location=" + location + ", epochTime="
+				+ epochTime + ", weatherDescription=" + weatherDescription
+				+ ", weatherIcon=" + weatherIcon + ", temperature="
+				+ temperature + ", realFeelTemperature=" + realFeelTemperature
+				+ ", windDirection=" + windDirection + ", windSpeed="
+				+ windSpeed + ", precipitation=" + precipitation + "]";
+	}
+	
 }

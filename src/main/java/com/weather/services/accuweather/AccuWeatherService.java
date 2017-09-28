@@ -1,4 +1,4 @@
-package com.weather.services;
+package com.weather.services.accuweather;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -7,34 +7,64 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.properties.AccuWeatherConfigProperties;
+import com.weather.services.WeatherService;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
 public class AccuWeatherService extends WeatherService {
-
-	@Autowired
-	private AccuWeatherConfigProperties conf;
+	private static final String GEOPOSITION_URL = "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search";
+	private static final String SEARCHTEXT_URL = "http://dataservice.accuweather.com/locations/v1/search";
+	private static final String WEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/";
+	private static final String APIPARAM_NAME = "apikey";
 	
-	public void test(){
-		System.out.println(conf.getAccuweatherKeyParamName());
+	private Map<String, CurrentWeatherStatus> weatherList = new HashMap<>();
+	
+	private String language;
+	
+	private AccuWeatherService(AccuWeatherService accu){
+		super(accu.getApiKey(), APIPARAM_NAME);
+		setByApiQueryParam(true);
+	}
+	
+	public AccuWeatherService() {
+		// Empty Constructor
+		language = "en";
 	}
 
-	@SuppressWarnings("unchecked")
+	public AccuWeatherService setKey(String apiKey) {
+		if (isValidKey())
+			throw new IllegalArgumentException("apiKey cannot be null or empty");
+		
+		this.setApiKey(apiKey);
+		return this;
+	}
+	
+	public AccuWeatherService setLanguage(String lang){
+		language = lang;
+		return this;
+	}
+	
+	public AccuWeatherService build(){
+		if (!isValidKey())
+			throw new IllegalArgumentException("apiKey cannot be null or empty");
+		
+		return new AccuWeatherService(this);
+	}
+	
 	@Override
 	public List<Location> getLocationsDataByName(String siteName) {
+		validateApiQueryParam();
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put(conf.getAccuweatherKeyParamName(), conf.getAccuweatherKey());
 		params.put("q", siteName);
 		params.put("details", "false");
 		
-		ResponseEntity<List> response = getResponseEntityList(conf.getTextURL(), params);
+		ResponseEntity<List> response = getAPIWeatherResponseEntityList(SEARCHTEXT_URL, params);
 		List<Location> locations = new ArrayList<>();
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			
@@ -52,25 +82,21 @@ public class AccuWeatherService extends WeatherService {
 		return locations;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Location getLocationDataByGeoposition(double lat, double lon) {
+		validateApiQueryParam();
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put(conf.getAccuweatherKeyParamName(), conf.getAccuweatherKey());
 		params.put("q", lat + "," + lon);
 		params.put("details", "false");
-		
-		ResponseEntity<Map> response = getResponseEntityMap(conf.getGeopositionURL(), params);
+		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(GEOPOSITION_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());
 		} else{
 			System.err.println("[AccuWeatherService -> getLocationDataByGeoposition] ERROR = " + response);
 		}
-
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Location responseToLocation(Map<String, Object> element){
 		Location loc = new Location();
@@ -98,20 +124,18 @@ public class AccuWeatherService extends WeatherService {
 		}
 		return loc;
 	}
-	
+
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
+		validateApiQueryParam();
 		Map<String, String> params = new HashMap<String, String>();
-		params.put(conf.getAccuweatherKeyParamName(), conf.getAccuweatherKey());
 		params.put("details", "true");
 		params.put("language", "es");
 		// AccuWeather checks the weather with an internal key
 		if (site.getServiceKey() == null || site.getServiceKey().isEmpty()){
-			System.err.println("[AccuWeatherService -> CurrentWeatherStatus] The Service Key cannot be null, "
-					+ "AccuWeather checks the weather with an internal key");
-			return null;
+			throw new IllegalArgumentException("The Service Key cannot be null, AccuWeather checks the weather with an internal key");
 		}
-		ResponseEntity<List> response = getResponseEntityList(conf.getWeatherURL() + site.getServiceKey(), params);
+		ResponseEntity<List> response = getAPIWeatherResponseEntityList(WEATHER_URL + site.getServiceKey(), params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			List<Map<String, Object>> body = response.getBody();
 			if (body != null && !body.isEmpty()){
@@ -125,13 +149,12 @@ public class AccuWeatherService extends WeatherService {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected CurrentWeatherStatus responseToWeather(Map<String, Object> element, Location loc) {
 		CurrentWeatherStatus weather = new CurrentWeatherStatus();
 		weather.setEpochTime(new Timestamp(Long.valueOf((Integer) element.get("EpochTime"))));
 		weather.setWeatherDescription((String) element.get("WeatherText"));
-		weather.setWeatherIcon((Integer) element.get("WeatherIcon"));
+		weather.setWeatherIcon(String.valueOf((Integer) element.get("WeatherIcon")));
 		Map<String, Map<String, Object>> subElement = (Map<String, Map<String, Object>>) element.get("Temperature");
 		if (subElement != null && subElement.get("Metric") != null){
 			weather.setTemperature((double) subElement.get("Metric").get("Value"));
