@@ -23,37 +23,28 @@ public class AccuWeatherService extends WeatherService {
 	private static final String WEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/";
 	private static final String APIPARAM_NAME = "apikey";
 	
-	private Map<String, CurrentWeatherStatus> weatherList = new HashMap<>();
-	
-	private String language;
-	
 	private AccuWeatherService(AccuWeatherService accu){
 		super(accu.getApiKey(), APIPARAM_NAME);
 		setByApiQueryParam(true);
 	}
 	
 	public AccuWeatherService() {
-		// Empty Constructor
-		language = "en";
+		setApiLanguage("en"); // default language
 	}
 
 	public AccuWeatherService setKey(String apiKey) {
-		if (isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty");
-		
-		this.setApiKey(apiKey);
+		setApiKey(apiKey);
 		return this;
 	}
 	
 	public AccuWeatherService setLanguage(String lang){
-		language = lang;
+		setApiLanguage(lang);
 		return this;
 	}
 	
 	public AccuWeatherService build(){
 		if (!isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty");
-		
+			throw new IllegalArgumentException("apiKey cannot be null or empty. Use setKey");
 		return new AccuWeatherService(this);
 	}
 	
@@ -63,6 +54,7 @@ public class AccuWeatherService extends WeatherService {
 		Map<String, String> params = new LinkedHashMap<>();
 		params.put("q", siteName);
 		params.put("details", "false");
+		params.put("language", getApiLanguage());
 		
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(SEARCHTEXT_URL, params);
 		List<Location> locations = new ArrayList<>();
@@ -88,6 +80,7 @@ public class AccuWeatherService extends WeatherService {
 		Map<String, String> params = new LinkedHashMap<>();
 		params.put("q", lat + "," + lon);
 		params.put("details", "false");
+		params.put("language", getApiLanguage());
 		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(GEOPOSITION_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());

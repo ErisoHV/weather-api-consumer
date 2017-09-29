@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
-import com.weather.services.openweather.OpenWeatherService;
+import com.weather.services.accuweather.AccuWeatherService;
 
 @SpringBootApplication
 public class Application implements CommandLineRunner {
@@ -29,21 +29,13 @@ public class Application implements CommandLineRunner {
 		site.setLatitude(-75.6373785784056);
 		site.setServiceKey("4607005");
 		
-		WeatherService test = new OpenWeatherService().setKey("8662a8d6fca3bb23af6c4942004be03a").build();
-		System.out.println(test.getWeather(site));
+//		WeatherService test = new OpenWeatherService().setKey("8662a8d6fca3bb23af6c4942004be03a").build();
+//		System.out.println(test.getWeather(site));
 //		Location a = test.getLocationDataByGeoposition(6.27780191817659,-75.6373785784056);
 //		System.out.println(a);
 //		System.out.println(test.getWeather(a));
-		
-		
-		
-		
-//		test = new AccuWeatherService().setKey("rLMgHjivBUnDHqOvZvr4eB52fxmYrAaP").build();
-//		System.out.println(test.getWeather(site));
-		
-//		test = new DarkSkyService().setKey("f53dd5b01075290f090f995f2d514964").build();
-//
-//		System.out.println(test.getWeather(site));
+
+		WeatherService test = new AccuWeatherService().setKey("rLMgHjivBUnDHqOvZvr4eB52fxmYrAaP").setLanguage("es").build();
+		System.out.println(test.getLocationsDataByName("Medellín, CO"));
 	}
-	
 }

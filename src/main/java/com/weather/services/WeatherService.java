@@ -23,6 +23,7 @@ public abstract class WeatherService {
 	private String apiKey;
 	private String apiParamName;
 	private boolean isByApiQueryParam = true;
+	private String apiLanguage;
 	
 	protected WeatherService(){
 		
@@ -33,15 +34,18 @@ public abstract class WeatherService {
 		this.apiParamName = apiParamName;
 	}
 	
-	protected String getApiKey() {
+	public String getApiKey() {
 		return apiKey;
 	}
 
 	protected void setApiKey(String apiKey) {
+		if (apiKey == null || apiKey.isEmpty())
+		    throw new IllegalArgumentException("apiKey cannot be null or empty");
+		
 		this.apiKey = apiKey;
 	}
 	
-	protected String getApiParamName() {
+	public String getApiParamName() {
 		return apiParamName;
 	}
 
@@ -55,6 +59,16 @@ public abstract class WeatherService {
 
 	protected void setByApiQueryParam(boolean isByApiQueryParam) {
 		this.isByApiQueryParam = isByApiQueryParam;
+	}
+
+	public String getApiLanguage() {
+		return apiLanguage;
+	}
+
+	protected void setApiLanguage(String language) {
+		if (language == null || language.isEmpty())
+			 throw new IllegalArgumentException("Language cannot be null or empty");
+		this.apiLanguage = language;
 	}
 
 	protected boolean isValidKey(){
@@ -102,7 +116,7 @@ public abstract class WeatherService {
 		}
 		addPathParameters(builder, pathParams);
 		addURLParameters(builder, urlParams);
-		return builder.build().encode();
+		return builder.build();
 	}
 	
 	/**
