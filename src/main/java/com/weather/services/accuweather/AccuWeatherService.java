@@ -26,6 +26,7 @@ public class AccuWeatherService extends WeatherService {
 	private AccuWeatherService(AccuWeatherService accu){
 		super(accu.getApiKey(), APIPARAM_NAME);
 		setByApiQueryParam(true);
+		setApiLanguage(accu.getApiLanguage());
 	}
 	
 	public AccuWeatherService() {
@@ -123,7 +124,7 @@ public class AccuWeatherService extends WeatherService {
 		validateApiQueryParam();
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("details", "true");
-		params.put("language", "es");
+		params.put("language", getApiLanguage());
 		// AccuWeather checks the weather with an internal key
 		if (site.getServiceKey() == null || site.getServiceKey().isEmpty()){
 			throw new IllegalArgumentException("The Service Key cannot be null, AccuWeather checks the weather with an internal key");
