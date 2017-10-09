@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
+import com.weather.services.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
@@ -30,7 +31,7 @@ public class AccuWeatherService extends WeatherService {
 	}
 	
 	public AccuWeatherService() {
-		setApiLanguage("en"); // default language
+		setApiLanguage(Language.en); // default language
 	}
 
 	public AccuWeatherService setKey(String apiKey) {
@@ -38,7 +39,7 @@ public class AccuWeatherService extends WeatherService {
 		return this;
 	}
 	
-	public AccuWeatherService setLanguage(String lang){
+	public AccuWeatherService setLanguage(Language lang){
 		setApiLanguage(lang);
 		return this;
 	}
@@ -55,7 +56,7 @@ public class AccuWeatherService extends WeatherService {
 		Map<String, String> params = new LinkedHashMap<>();
 		params.put("q", siteName);
 		params.put("details", "false");
-		params.put("language", getApiLanguage());
+		params.put("language", getApiLanguage().toString());
 		
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(SEARCHTEXT_URL, params);
 		List<Location> locations = new ArrayList<>();
@@ -81,7 +82,7 @@ public class AccuWeatherService extends WeatherService {
 		Map<String, String> params = new LinkedHashMap<>();
 		params.put("q", lat + "," + lon);
 		params.put("details", "false");
-		params.put("language", getApiLanguage());
+		params.put("language", getApiLanguage().toString());
 		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(GEOPOSITION_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());
@@ -124,7 +125,7 @@ public class AccuWeatherService extends WeatherService {
 		validateApiQueryParam();
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("details", "true");
-		params.put("language", getApiLanguage());
+		params.put("language", getApiLanguage().toString());
 		// AccuWeather checks the weather with an internal key
 		if (site.getServiceKey() == null || site.getServiceKey().isEmpty()){
 			throw new IllegalArgumentException("The Service Key cannot be null, AccuWeather checks the weather with an internal key");

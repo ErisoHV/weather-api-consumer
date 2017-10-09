@@ -10,8 +10,8 @@ public class Location {
 	private String serviceKey;
 	private String abbreviation;
 	private String locationType;
-	private double longitude;
-	private double latitude;
+	private Double longitude;
+	private Double latitude;
 
 	public long getLocationID() {
 		return locationID;
@@ -85,19 +85,19 @@ public class Location {
 		this.locationType = locationType;
 	}
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
 

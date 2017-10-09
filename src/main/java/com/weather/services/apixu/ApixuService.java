@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
+import com.weather.services.language.Language;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ApixuService extends WeatherService {
@@ -70,7 +71,7 @@ public class ApixuService extends WeatherService {
 	}
 	
 	public ApixuService() {
-		setApiLanguage("en"); 			// default language
+		setApiLanguage(Language.en); 	// default language
 		setTempUnit(Temperature.c);	  	// default temperature
 		setWindUnit(Velocity.kph); 		// default wind velocity
 		setPrecipUnit(Volume.mm);		// default volume 
@@ -81,7 +82,7 @@ public class ApixuService extends WeatherService {
 		return this;
 	}
 	
-	public ApixuService setLanguage(String lang){
+	public ApixuService setLanguage(Language lang){
 		setApiLanguage(lang);
 		return this;
 	}
@@ -135,8 +136,23 @@ public class ApixuService extends WeatherService {
 	public List<Location> getLocationsDataByName(String siteName) {
 		Map<String, String> params = new LinkedHashMap<>();
 		params.put("q", siteName);
-		params.put("lang", getApiLanguage());
-		
+		params.put("lang", getApiLanguage().toString());
+		return getLocations(params);
+	}
+
+	@Override
+	public Location getLocationDataByGeoposition(double lat, double lon) {
+		Map<String, String> params = new LinkedHashMap<>();
+		params.put("q", lat + "," + lon);
+		ArrayList<Location> list= (ArrayList<Location>) getLocations(params);
+		if (list != null && !list.isEmpty()){
+			return list.get(0);
+		}
+		return null;
+	}
+	
+	private List<Location> getLocations(Map<String, String> params){
+		params.put("lang", getApiLanguage().toString());
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(SEARCHTEXT_URL, params);
 		List<Location> locations = new ArrayList<>();
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
@@ -154,21 +170,13 @@ public class ApixuService extends WeatherService {
 		}
 		return locations;
 	}
-
-	@Override
-	public Location getLocationDataByGeoposition(double lat, double lon) {
-		Map<String, String> params = new LinkedHashMap<>();
-		params.put("q", lat + "," + lon);
-		params.put("lang", getApiLanguage());
-		
-		return null;
-	}
+	
 
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("q", site.getName());
-		params.put("lang", getApiLanguage());
+		params.put("lang", getApiLanguage().toString());
 
 		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(WEATHER_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){

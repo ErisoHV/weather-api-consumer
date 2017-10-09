@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
+import com.weather.services.language.Language;
 
 /**
  * https://openweathermap.org
@@ -32,6 +33,12 @@ public class OpenWeatherService extends WeatherService{
 	public OpenWeatherService() {
 		// Empty Constructor
 	}
+	
+	public OpenWeatherService setLanguage(Language language){
+		setApiLanguage(language);
+		return this;
+	}
+
 
 	public OpenWeatherService setKey(String apiKey) {
 		if (isValidKey())
@@ -64,12 +71,17 @@ public class OpenWeatherService extends WeatherService{
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
 		validateApiQueryParam();
-		if (site.getServiceKey() == null || site.getServiceKey().isEmpty()){
-			throw new IllegalArgumentException("The Service Key cannot be null");
-		}
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put("id", site.getServiceKey());
-		
+		if (site.getServiceKey() != null && site.getServiceKey().isEmpty()){
+			params.put("id", site.getServiceKey());
+		} else if (site.getLatitude() != null && site.getLongitude() != null){
+			params.put ("lat", String.valueOf(site.getLatitude()));
+			params.put ("lon", String.valueOf(site.getLongitude()));
+		} else if (site.getName() != null && !site.getName().isEmpty()){
+			params.put("q", site.getName());
+		} else{
+			throw new IllegalArgumentException("Invalid Location");
+		}
 		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(WEATHER_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			Map<String, Object> body = response.getBody();
@@ -110,6 +122,9 @@ public class OpenWeatherService extends WeatherService{
 			}
 			weather.setEpochTime(new Timestamp(Long.valueOf((Integer) element.get("dt"))));
 		}
+		// Complete weather information
+		loc.setServiceKey(String.valueOf(element.get("id")));
+		weather.setLocation(loc);
 		return weather;
 	}
 

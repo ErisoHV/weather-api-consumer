@@ -13,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
+import com.weather.services.language.Language;
 
 public abstract class WeatherService {
 
@@ -23,7 +24,7 @@ public abstract class WeatherService {
 	private String apiKey;
 	private String apiParamName;
 	private boolean isByApiQueryParam = true;
-	private String apiLanguage;
+	private Language apiLanguage;
 	
 	protected WeatherService(){
 		
@@ -61,12 +62,12 @@ public abstract class WeatherService {
 		this.isByApiQueryParam = isByApiQueryParam;
 	}
 
-	public String getApiLanguage() {
+	public Language getApiLanguage() {
 		return apiLanguage;
 	}
 
-	protected void setApiLanguage(String language) {
-		if (language == null || language.isEmpty())
+	protected void setApiLanguage(Language language) {
+		if (language == null || language.toString().isEmpty())
 			 throw new IllegalArgumentException("Language cannot be null or empty");
 		this.apiLanguage = language;
 	}
