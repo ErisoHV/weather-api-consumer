@@ -6,9 +6,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.weather.model.Location;
-import com.weather.services.apixu.ApixuService;
-import com.weather.services.apixu.ApixuService.Temperature;
-import com.weather.services.apixu.ApixuService.Volume;
+import com.weather.services.WeatherService;
+import com.weather.services.accuweather.AccuWeatherService;
 import com.weather.services.language.Language;
 
 @SpringBootApplication
@@ -29,7 +28,7 @@ public class Application implements CommandLineRunner {
 		Location site = new Location();
 		site.setLongitude(6.27780191817659);
 		site.setLatitude(-75.6373785784056);
-		site.setServiceKey("519188");  // Example for Accuweather: 107060
+		site.setServiceKey("107060");  // Example for Accuweather: 107060
 									   // Example for OpenWeather: 519188
 		site.setName("Novinki");
 		
@@ -38,13 +37,13 @@ public class Application implements CommandLineRunner {
 //		Location a = test.getLocationDataByGeoposition(6.27780191817659,-75.6373785784056);
 //		System.out.println(a);
 //		System.out.println(test.getWeather(a));
-
-//		WeatherService test = new AccuWeatherService().setKey("rLMgHjivBUnDHqOvZvr4eB52fxmYrAaP").setLanguage("es").build();
-//		System.out.println(test.getLocationsDataByName("Medellín, CO"));
+//rLMgHjivBUnDHqOvZvr4eB52fxmYrAaP
+		WeatherService test = new AccuWeatherService().setKey("rLMgHjivBUnDHqOvZvr4eB52fxmYrAaP").setLanguage(Language.es).build();
+		System.out.println(test.getWeather(site));
 		
-		ApixuService test = new ApixuService().setKey("1c4f43ac14484c25895163008170210")
-				.setLanguage(Language.az).setTempUnit(Temperature.f).setPrecipUnit(Volume.mm).build();
-		System.out.println(test.getLocationDataByGeoposition(48.8567, 2.3508));
+//		ApixuService test = new ApixuService().setKey("1c4f43ac14484c25895163008170210")
+//				.setLanguage(Language.az).setTempUnit(Temperature.f).setPrecipUnit(Volume.mm).build();
+//		System.out.println(test.getLocationDataByGeoposition(48.8567, 2.3508));
 		
 		
 	}

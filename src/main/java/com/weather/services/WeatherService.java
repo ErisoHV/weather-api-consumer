@@ -11,16 +11,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.weather.exception.WeatherServiceException;
+import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.language.Language;
 
 public abstract class WeatherService {
-
-	public static final String TEMP_SYMBOL = "&deg;";
-	public static final String VEL_SYMBOL = "km/h";
-	public static final String PREC_SYMBOL = "mm";
-	
 	private String apiKey;
 	private String apiParamName;
 	private boolean isByApiQueryParam = true;
@@ -41,7 +38,7 @@ public abstract class WeatherService {
 
 	protected void setApiKey(String apiKey) {
 		if (apiKey == null || apiKey.isEmpty())
-		    throw new IllegalArgumentException("apiKey cannot be null or empty");
+		    throw new WeatherServiceKeyException();
 		
 		this.apiKey = apiKey;
 	}
@@ -82,7 +79,7 @@ public abstract class WeatherService {
 
 	protected void validateApiQueryParam(){
 		if (!isValidKey()){
-			throw new IllegalArgumentException("apiKey cannot be null or empty. Use setKey");
+			throw new WeatherServiceKeyException();
 		}
 		if (isByApiQueryParam){	
 			if (!isValidParamKey()){
@@ -161,11 +158,11 @@ public abstract class WeatherService {
 				else{
 					System.err.println("[WeatherService -> getResponseEntityList] Error (" + map.getStatusCodeValue() + ") " +
 							map.getBody());
+					throw new WeatherServiceException("Error (" + map.getStatusCodeValue() + ") " + map.getBody());
 				}
 		} catch (RestClientException e) {
-			System.err.println("Rest Client exception, check API key and query params. Response = " + e.getMessage());
+			throw new WeatherServiceException("Rest Client exception, check API key and query params. Response = " + e.getMessage());
 		}
-		return null;
 	}
 	
 	/**

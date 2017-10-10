@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.weather.exception.WeatherServiceException;
+import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
@@ -46,7 +48,7 @@ public class AccuWeatherService extends WeatherService {
 	
 	public AccuWeatherService build(){
 		if (!isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty. Use setKey");
+			throw new WeatherServiceKeyException();
 		return new AccuWeatherService(this);
 	}
 	
@@ -126,10 +128,6 @@ public class AccuWeatherService extends WeatherService {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("details", "true");
 		params.put("language", getApiLanguage().toString());
-		// AccuWeather checks the weather with an internal key
-		if (site.getServiceKey() == null || site.getServiceKey().isEmpty()){
-			throw new IllegalArgumentException("The Service Key cannot be null, AccuWeather checks the weather with an internal key");
-		}
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(WEATHER_URL + site.getServiceKey(), params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			List<Map<String, Object>> body = response.getBody();
@@ -138,7 +136,12 @@ public class AccuWeatherService extends WeatherService {
 			}
 			
 		} else{
-			System.err.println("[AccuWeatherService -> HistoricoClimaDTO] ERROR = " + response.getBody());
+			if (response != null && response.getBody() != null){
+				Map<String, Object> bodyError =  (Map<String, Object>) response.getBody();
+				throw new WeatherServiceException((String) bodyError.get("Message"));
+			} else{
+				throw new WeatherServiceException("AccuWeather service error");
+			}
 		}
 		
 		return null;
@@ -178,6 +181,7 @@ public class AccuWeatherService extends WeatherService {
 		}
 		
 		weather.setLocation(loc);
+		weather.setWeatherServiceName(this.getClass().getSimpleName());
 		
 		return weather;
 	}
