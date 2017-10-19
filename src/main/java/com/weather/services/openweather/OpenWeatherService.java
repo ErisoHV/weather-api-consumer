@@ -25,6 +25,8 @@ public class OpenWeatherService extends WeatherService{
 	private static final String WEATHER_URL = "http://samples.openweathermap.org/data/2.5/weather";
 	private static final String APIPARAM_NAME = "appid";
 	
+	public static final String SERVICE_NAME = "OPENWEATHER";
+	
 	private OpenWeatherService(OpenWeatherService open){
 		super(open.getApiKey(), APIPARAM_NAME);
 		setByApiQueryParam(true);
@@ -127,5 +129,5 @@ public class OpenWeatherService extends WeatherService{
 		weather.setLocation(loc);
 		return weather;
 	}
-
+	
 }

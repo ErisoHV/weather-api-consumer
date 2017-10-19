@@ -10,6 +10,8 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.weather.exception.WeatherServiceException;
+import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
@@ -21,6 +23,8 @@ public class ApixuService extends WeatherService {
 	private static final String SEARCHTEXT_URL = "http://api.apixu.com/v1/search.json";
 	private static final String WEATHER_URL = "http://api.apixu.com/v1/current.json";
 	private static final String APIPARAM_NAME = "key";
+	
+	public static final String SERVICE_NAME = "APIXU";
 	
 	private Temperature tempUnit;
 	private Volume precipUnit;
@@ -128,7 +132,7 @@ public class ApixuService extends WeatherService {
 
 	public ApixuService build(){
 		if (!isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty. Use setKey");
+			throw new WeatherServiceKeyException();
 		return new ApixuService(this);
 	}
 
@@ -166,29 +170,61 @@ public class ApixuService extends WeatherService {
 				}
 			}
 		} else{
-			System.err.println("[ApixuService -> getLocationsDataByName] ERROR = " + response);
+			if (response != null && response.getBody() != null)
+				throw new WeatherServiceException(response.getBody().toString());
+			else
+				throw new WeatherServiceException("Response is null");
 		}
 		return locations;
 	}
 	
+	public CurrentWeatherStatus getWeatherByName(String name){
+		if (name == null || name.isEmpty())
+			throw new IllegalArgumentException("The location name cannot be null or empty");
+		
+		Location loc = new Location();
+		loc.setName(name);
+		return getWeather(loc);
+	}
+	
+	public CurrentWeatherStatus getWeatherByGeoposition(double lat, double lon){
+		Location loc = new Location();
+		loc.setLatitude(lat);
+		loc.setLongitude(lon);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("q", loc.getLatitude() + ", " + loc.getLongitude());
+		params.put("lang", getApiLanguage().toString());
 
+		return callToApixuWeatherService(params, loc);
+	}
+
+	/**
+	 * Get the weather by location name
+	 * @param site The location with a defined name
+	 * @return  CurrentWeatherStatus
+	 */
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("q", site.getName());
 		params.put("lang", getApiLanguage().toString());
 
+		return callToApixuWeatherService(params,site);
+	}
+	
+	private CurrentWeatherStatus callToApixuWeatherService(Map<String, String> params, Location site){
 		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(WEATHER_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			Map<String, Object> body = response.getBody();
 			if (body != null && !body.isEmpty()){
 				return responseToWeather(body, site);
 			}
-			
 		} else{
-			System.err.println("[ApixuService -> getWeather] ERROR = " + response.getBody());
+			if (response != null && response.getBody() != null)
+				throw new WeatherServiceException(response.getBody().toString());
+			else
+				throw new WeatherServiceException("Response is null");
 		}
-		
 		return null;
 	}
 
@@ -226,8 +262,14 @@ public class ApixuService extends WeatherService {
 				weather.setWeatherIcon((String) subSubElement.get("icon"));
 			}
 		}
+		
+		subElement = (Map<String, Object>) element.get("location");
+		if (subElement != null){
+			loc = responseToLocation(subElement);
+		}
+		weather.setWeatherServiceName(SERVICE_NAME);
 		weather.setLocation(loc);
 		return weather;
 	}
-
+	
 }

@@ -26,6 +26,8 @@ public class AccuWeatherService extends WeatherService {
 	private static final String WEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/";
 	private static final String APIPARAM_NAME = "apikey";
 	
+	public static final String SERVICE_NAME = "ACCUWEATHER";
+	
 	private AccuWeatherService(AccuWeatherService accu){
 		super(accu.getApiKey(), APIPARAM_NAME);
 		setByApiQueryParam(true);
@@ -63,7 +65,6 @@ public class AccuWeatherService extends WeatherService {
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(SEARCHTEXT_URL, params);
 		List<Location> locations = new ArrayList<>();
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
-			
 			List<Map<String, Object>> body = response.getBody();
 			if (body != null && !body.isEmpty()){
 				Location loc;
@@ -73,7 +74,10 @@ public class AccuWeatherService extends WeatherService {
 				}
 			}
 		} else{
-			System.err.println("[AccuWeatherService -> getLocationsDataByName] ERROR = " + response);
+			if (response != null && response.getBody() != null)
+				throw new WeatherServiceException(response.getBody().toString());
+			else
+				throw new WeatherServiceException("Response is null");
 		}
 		return locations;
 	}
@@ -89,9 +93,11 @@ public class AccuWeatherService extends WeatherService {
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());
 		} else{
-			System.err.println("[AccuWeatherService -> getLocationDataByGeoposition] ERROR = " + response);
+			if (response != null && response.getBody() != null)
+				throw new WeatherServiceException(response.getBody().toString());
+			else
+				throw new WeatherServiceException("Response is null");
 		}
-		return null;
 	}
 
 	@Override
@@ -136,12 +142,10 @@ public class AccuWeatherService extends WeatherService {
 			}
 			
 		} else{
-			if (response != null && response.getBody() != null){
-				Map<String, Object> bodyError =  (Map<String, Object>) response.getBody();
-				throw new WeatherServiceException((String) bodyError.get("Message"));
-			} else{
-				throw new WeatherServiceException("AccuWeather service error");
-			}
+			if (response != null && response.getBody() != null)
+				throw new WeatherServiceException(response.getBody().toString());
+			else
+				throw new WeatherServiceException("Response is null");
 		}
 		
 		return null;
@@ -179,7 +183,7 @@ public class AccuWeatherService extends WeatherService {
 				 weather.setPrecipitation((double) subSubSubElement.get("Value"));
 			}
 		}
-		
+		weather.setWeatherServiceName(SERVICE_NAME);
 		weather.setLocation(loc);
 		weather.setWeatherServiceName(this.getClass().getSimpleName());
 		

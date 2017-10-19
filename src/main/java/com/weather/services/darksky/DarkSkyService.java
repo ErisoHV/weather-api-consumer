@@ -2,40 +2,49 @@ package com.weather.services.darksky;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.weather.exception.WeatherServiceException;
+import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.WeatherService;
+import com.weather.services.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class DarkSkyService extends WeatherService{
 	private static final String WEATHER_URL = "https://api.darksky.net/forecast/";
+	
+	public static final String SERVICE_NAME = "DARKSKY";
 
-	private DarkSkyService(DarkSkyService accu){
-		super(accu.getApiKey(), "");
+	private DarkSkyService(DarkSkyService service){
+		super(service.getApiKey(), "");
 		setByApiQueryParam(false);
+		setApiLanguage(service.getApiLanguage());
 	}
 	
 	public DarkSkyService() {
-		// Empty Constructor
+		setApiLanguage(Language.en);
 	}
 
 	public DarkSkyService setKey(String apiKey) {
-		if (isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty");
-		
 		this.setApiKey(apiKey);
+		return this;
+	}
+	
+	public DarkSkyService setLanguage(Language lang){
+		setApiLanguage(lang);
 		return this;
 	}
 	
 	public DarkSkyService build(){
 		if (!isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty");
+			throw new WeatherServiceKeyException();
 		
 		return new DarkSkyService(this);
 	}
@@ -56,10 +65,12 @@ public class DarkSkyService extends WeatherService{
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
 		List<String> params = new ArrayList<>();
-		
 		params.add(site.getLatitude() + "," + site.getLongitude());
 		
-		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(WEATHER_URL, params);
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("lang", getApiLanguage().toString());
+		
+		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(WEATHER_URL, queryParams, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			Map<String, Object> body = response.getBody();
 			if (body != null && !body.isEmpty()){
@@ -67,7 +78,10 @@ public class DarkSkyService extends WeatherService{
 			}
 			
 		} else{
-			System.err.println("[AccuWeatherService -> HistoricoClimaDTO] ERROR = " + response);
+			if (response != null && response.getBody() != null)
+				throw new WeatherServiceException(response.getBody().toString());
+			else
+				throw new WeatherServiceException("Response is null");
 		}
 		return null;
 	}
@@ -86,14 +100,13 @@ public class DarkSkyService extends WeatherService{
 			weather.setEpochTime(new Timestamp(Long.valueOf((Integer)map.get("time"))));
 			weather.setWeatherDescription((String) map.get("summary"));
 			weather.setWeatherIcon((String) map.get("icon"));
-			weather.setPrecipitation((double) map.get("precipIntensity"));
+			weather.setPrecipitation((int) map.get("precipIntensity"));
 			weather.setTemperature((double) map.get("temperature"));
 			weather.setWindSpeed((double) map.get("windSpeed"));
 		}
-		
+		weather.setWeatherServiceName(SERVICE_NAME);
 		weather.setLocation(loc);
 		
 		return weather;
 	}
-
 }

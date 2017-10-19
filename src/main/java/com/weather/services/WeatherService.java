@@ -37,7 +37,7 @@ public abstract class WeatherService {
 	}
 
 	protected void setApiKey(String apiKey) {
-		if (apiKey == null || apiKey.isEmpty())
+		if (isValidKey())
 		    throw new WeatherServiceKeyException();
 		
 		this.apiKey = apiKey;
@@ -205,11 +205,11 @@ public abstract class WeatherService {
 				else{
 					System.err.println("[WeatherService -> getResponseEntityMap] Error (" + map.getStatusCodeValue() + ") " +
 							map.getBody());
+					throw new WeatherServiceException("Error (" + map.getStatusCodeValue() + ") " + map.getBody());
 				}
 		} catch (RestClientException e) {
-			System.err.println("Rest Client exception, check API key and query params. Response = " + e.getMessage());
+			throw new WeatherServiceException("Rest Client exception, check API key and query params. Response = " + e.getMessage());
 		}
-		return null;
 	}
 
 	public abstract List<Location> getLocationsDataByName(String siteName);
