@@ -21,12 +21,38 @@ import com.weather.services.language.Language;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
 public class AccuWeatherService extends WeatherService {
-	private static final String GEOPOSITION_URL = "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search";
-	private static final String SEARCHTEXT_URL = "http://dataservice.accuweather.com/locations/v1/search";
-	private static final String WEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/";
-	private static final String APIPARAM_NAME = "apikey";
+	public static final String GEOPOSITION_URL = "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search";
+	public static final String SEARCHTEXT_URL = "http://dataservice.accuweather.com/locations/v1/search";
+	public static final String WEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/";
+	public static final String APIPARAM_NAME = "apikey";
 	
 	public static final String SERVICE_NAME = "ACCUWEATHER";
+	
+	public enum fields {
+		LocalizedName,
+		Metric,
+		EnglishName,
+		EpochTime,
+		AdministrativeArea,
+		Country,
+		Region,
+		Key,
+		Type,
+		GeoPosition,
+		Longitude,
+		Latitude,
+		WeatherText,
+		WeatherIcon,
+		Temperature,
+		Value,
+		Wind,
+		Direction,
+		Localized,
+		Speed,
+		PrecipitationSummary,
+		Precipitation,
+		RealFeelTemperature
+	}
 	
 	private AccuWeatherService(AccuWeatherService accu){
 		super(accu.getApiKey(), APIPARAM_NAME);
@@ -74,10 +100,7 @@ public class AccuWeatherService extends WeatherService {
 				}
 			}
 		} else{
-			if (response != null && response.getBody() != null)
-				throw new WeatherServiceException(response.getBody().toString());
-			else
-				throw new WeatherServiceException("Response is null");
+			throw new WeatherServiceException(response);
 		}
 		return locations;
 	}
@@ -93,37 +116,34 @@ public class AccuWeatherService extends WeatherService {
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());
 		} else{
-			if (response != null && response.getBody() != null)
-				throw new WeatherServiceException(response.getBody().toString());
-			else
-				throw new WeatherServiceException("Response is null");
+			throw new WeatherServiceException(response);
 		}
 	}
 
 	@Override
 	protected Location responseToLocation(Map<String, Object> element){
 		Location loc = new Location();
-		loc.setName((String) element.get("EnglishName"));
-		loc.setLocalizedName((String) element.get("LocalizedName"));
-		Map<String, Object> subElement = (Map<String, Object>) element.get("AdministrativeArea");
+		loc.setName((String) element.get(fields.EnglishName.toString()));
+		loc.setLocalizedName((String) element.get(fields.LocalizedName.toString()));
+		Map<String, Object> subElement = (Map<String, Object>) element.get(fields.AdministrativeArea.toString());
 		if (subElement != null && !subElement.isEmpty()){
-			loc.setAdministrativeAreaName((String) subElement.get("LocalizedName"));
+			loc.setAdministrativeAreaName((String) subElement.get(fields.LocalizedName.toString()));
 		}
-		subElement = (Map<String, Object>) element.get("Country");
+		subElement = (Map<String, Object>) element.get(fields.Country.toString());
 		if (subElement != null && !subElement.isEmpty()){
-			loc.setLocationCountryName((String) subElement.get("LocalizedName"));
+			loc.setLocationCountryName((String) subElement.get(fields.LocalizedName.toString()));
 		}
-		subElement = (Map<String, Object>) element.get("Region");
+		subElement = (Map<String, Object>) element.get(fields.Region.toString());
 		if (subElement != null && !subElement.isEmpty()){
-			loc.setLocationRegionName((String) subElement.get("LocalizedName"));
+			loc.setLocationRegionName((String) subElement.get(fields.LocalizedName.toString()));
 		}
-		loc.setServiceKey((String) element.get("Key"));
-		loc.setLocationType((String) element.get("Type"));
+		loc.setServiceKey((String) element.get(fields.Key.toString()));
+		loc.setLocationType((String) element.get(fields.Type.toString()));
 		
-		subElement = (Map<String, Object>) element.get("GeoPosition");
+		subElement = (Map<String, Object>) element.get(fields.GeoPosition.toString());
 		if (subElement != null && !subElement.isEmpty()){
-			loc.setLongitude((double) subElement.get("Longitude"));
-			loc.setLatitude((double) subElement.get("Latitude"));
+			loc.setLongitude((double) subElement.get(fields.Longitude.toString()));
+			loc.setLatitude((double) subElement.get(fields.Latitude.toString()));
 		}
 		return loc;
 	}
@@ -131,7 +151,7 @@ public class AccuWeatherService extends WeatherService {
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
 		validateApiQueryParam();
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("details", "true");
 		params.put("language", getApiLanguage().toString());
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(WEATHER_URL + site.getServiceKey(), params);
@@ -142,10 +162,7 @@ public class AccuWeatherService extends WeatherService {
 			}
 			
 		} else{
-			if (response != null && response.getBody() != null)
-				throw new WeatherServiceException(response.getBody().toString());
-			else
-				throw new WeatherServiceException("Response is null");
+			throw new WeatherServiceException(response);
 		}
 		
 		return null;
@@ -154,33 +171,38 @@ public class AccuWeatherService extends WeatherService {
 	@Override
 	protected CurrentWeatherStatus responseToWeather(Map<String, Object> element, Location loc) {
 		CurrentWeatherStatus weather = new CurrentWeatherStatus();
-		weather.setEpochTime(new Timestamp(Long.valueOf((Integer) element.get("EpochTime"))));
-		weather.setWeatherDescription((String) element.get("WeatherText"));
-		weather.setWeatherIcon(String.valueOf((Integer) element.get("WeatherIcon")));
-		Map<String, Map<String, Object>> subElement = (Map<String, Map<String, Object>>) element.get("Temperature");
-		if (subElement != null && subElement.get("Metric") != null){
-			weather.setTemperature((double) subElement.get("Metric").get("Value"));
+		weather.setEpochTime(new Timestamp(Long.valueOf((Integer) element.get(fields.EpochTime.toString()))));
+		weather.setWeatherDescription((String) element.get(fields.WeatherText.toString()));
+		weather.setWeatherIcon(String.valueOf((Integer) element.get(fields.WeatherIcon.toString())));
+		Map<String, Map<String, Object>> subElement = 
+				(Map<String, Map<String, Object>>) element.get(fields.Temperature.toString());
+		if (subElement != null && subElement.get(fields.Metric.toString())  != null){
+			weather.setTemperature((double) subElement.get(fields.Metric.toString()).get(fields.Value.toString()));
 		}
-		subElement = (Map<String, Map<String, Object>>) element.get("RealFeelTemperature");
-		if (subElement != null && subElement.get("Metric") != null){
-			weather.setRealFeelTemperature((double) subElement.get("Metric").get("Value"));
+		subElement = (Map<String, Map<String, Object>>) element.get(fields.RealFeelTemperature.toString());
+		if (subElement != null && subElement.get(fields.Metric.toString()) != null){
+			weather.setRealFeelTemperature((double) subElement.get(fields.Metric.toString()).get(fields.Value.toString()));
 		}
-		subElement = (Map<String, Map<String, Object>>) element.get("Wind");
+		subElement = (Map<String, Map<String, Object>>) element.get(fields.Wind.toString());
 		if (subElement != null){
-			if (subElement.get("Direction") != null){
-				weather.setWindDirection((String) subElement.get("Direction").get("Localized"));
+			if (subElement.get(fields.Direction.toString()) != null){
+				weather.setWindDirection((String) subElement.get(fields.Direction.toString()).get(fields.Localized.toString()));
 			}
-			if (subElement.get("Speed") != null && subElement.get("Speed").get("Metric") != null){
-				Map<String, Object> subSubElement = (Map<String, Object>) subElement.get("Speed").get("Metric");
-				weather.setWindSpeed((double) subSubElement.get("Value"));
+			if (subElement.get(fields.Speed.toString()) != null 
+					&& subElement.get(fields.Speed.toString()).get(fields.Metric.toString()) != null){
+				Map<String, Object> subSubElement = 
+						(Map<String, Object>) subElement.get(fields.Speed.toString()).get(fields.Metric.toString());
+				weather.setWindSpeed((double) subSubElement.get(fields.Value.toString()));
 			}
 		}
-		subElement = (Map<String, Map<String, Object>>) element.get("PrecipitationSummary");
+		subElement = (Map<String, Map<String, Object>>) element.get(fields.PrecipitationSummary.toString());
 		if (subElement != null){
-			Map<String, Map<String, Object>> subSubElement = (Map<String, Map<String, Object>>) element.get("PrecipitationSummary");
-			if (subSubElement != null && subSubElement.get("Precipitation") != null){
-				 Map<String, Object> subSubSubElement = (Map<String, Object>) subSubElement.get("Precipitation").get("Metric");
-				 weather.setPrecipitation((double) subSubSubElement.get("Value"));
+			Map<String, Map<String, Object>> subSubElement = 
+					(Map<String, Map<String, Object>>) element.get((fields.PrecipitationSummary.toString()));
+			if (subSubElement != null && subSubElement.get(fields.Precipitation.toString()) != null){
+				 Map<String, Object> subSubSubElement = 
+						 (Map<String, Object>) subSubElement.get(fields.Precipitation.toString()).get(fields.Metric.toString());
+				 weather.setPrecipitation((double) subSubSubElement.get(fields.Value.toString()));
 			}
 		}
 		weather.setWeatherServiceName(SERVICE_NAME);

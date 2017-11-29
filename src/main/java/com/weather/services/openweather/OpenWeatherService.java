@@ -1,10 +1,12 @@
 package com.weather.services.openweather;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -21,11 +23,13 @@ import com.weather.services.language.Language;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class OpenWeatherService extends WeatherService{
-	private static final String SEARCHTEXT_URL = "http://bulk.openweathermap.org/sample/city.list.json.gz";
-	private static final String WEATHER_URL = "http://samples.openweathermap.org/data/2.5/weather";
-	private static final String APIPARAM_NAME = "appid";
+	public static final String SEARCHTEXT_URL = "http://bulk.openweathermap.org/sample/city.list.json.gz";
+	public static final String WEATHER_URL = "http://samples.openweathermap.org/data/2.5/weather";
+	public static final String APIPARAM_NAME = "appid";
 	
 	public static final String SERVICE_NAME = "OPENWEATHER";
+	
+	private static final Logger LOGGER = Logger.getLogger(OpenWeatherService.class);
 	
 	private OpenWeatherService(OpenWeatherService open){
 		super(open.getApiKey(), APIPARAM_NAME);
@@ -60,13 +64,11 @@ public class OpenWeatherService extends WeatherService{
 	
 	@Override
 	public List<Location> getLocationsDataByName(String siteName) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
 	public Location getLocationDataByGeoposition(double lat, double lon) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -91,14 +93,13 @@ public class OpenWeatherService extends WeatherService{
 				return responseToWeather(body, site);
 			}
 		} else{
-			System.err.println("[AccuWeatherService -> getLocationsDataByName] ERROR = " + response);
+			LOGGER.error("[AccuWeatherService -> getLocationsDataByName] ERROR = " + response);
 		}
 		return null;
 	}
 
 	@Override
 	protected Location responseToLocation(Map<String, Object> element) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

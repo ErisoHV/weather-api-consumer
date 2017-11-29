@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -22,6 +23,8 @@ public abstract class WeatherService {
 	private String apiParamName;
 	private boolean isByApiQueryParam = true;
 	private Language apiLanguage;
+	
+	private  static final Logger LOGGER = Logger.getLogger(WeatherService.class);
 	
 	protected WeatherService(){
 		
@@ -81,10 +84,8 @@ public abstract class WeatherService {
 		if (!isValidKey()){
 			throw new WeatherServiceKeyException();
 		}
-		if (isByApiQueryParam){	
-			if (!isValidParamKey()){
+		if (isByApiQueryParam && !isValidParamKey()){	
 				throw new IllegalArgumentException("paramKey name cannot be null or empty. Use build()");
-			}
 		}
 
 	}
@@ -156,7 +157,7 @@ public abstract class WeatherService {
 					return map;
 				}
 				else{
-					System.err.println("[WeatherService -> getResponseEntityList] Error (" + map.getStatusCodeValue() + ") " +
+					LOGGER.error("[WeatherService -> getResponseEntityList] Error (" + map.getStatusCodeValue() + ") " +
 							map.getBody());
 					throw new WeatherServiceException("Error (" + map.getStatusCodeValue() + ") " + map.getBody());
 				}
@@ -203,7 +204,7 @@ public abstract class WeatherService {
 					return map;
 				}
 				else{
-					System.err.println("[WeatherService -> getResponseEntityMap] Error (" + map.getStatusCodeValue() + ") " +
+					LOGGER.error("[WeatherService -> getResponseEntityMap] Error (" + map.getStatusCodeValue() + ") " +
 							map.getBody());
 					throw new WeatherServiceException("Error (" + map.getStatusCodeValue() + ") " + map.getBody());
 				}

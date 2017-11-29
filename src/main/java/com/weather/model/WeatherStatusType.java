@@ -3,7 +3,7 @@ package com.weather.model;
 public class WeatherStatusType {
 	private long id;
 	private String name;
-	private String locName; //TODO ver nombre
+	private String locName;
 	private String icon;
 	
 	public long getIdeTipoClima() {

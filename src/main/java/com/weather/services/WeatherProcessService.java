@@ -9,7 +9,7 @@ import com.weather.model.CurrentWeatherStatus;
 
 @Service
 public class WeatherProcessService {
-	private Map<Long, CurrentWeatherStatus> weatherList = new HashMap<Long, CurrentWeatherStatus>();
+	private Map<Long, CurrentWeatherStatus> weatherList = new HashMap<>();
 
 	public Map<Long, CurrentWeatherStatus> getWeatherList() {
 		return weatherList;

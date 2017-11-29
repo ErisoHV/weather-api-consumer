@@ -15,6 +15,10 @@ import com.weather.services.openweather.OpenWeatherService;
 @Service
 public class CurrentWeatherStatusService {
 	
+	private CurrentWeatherStatusService() {
+		// Empty constructor
+	}
+	
 	public static CurrentWeatherStatus getCurrent(String serviceName, double latitude, double longitude, 
 			Language lang, String key){
 		
@@ -45,7 +49,7 @@ public class CurrentWeatherStatusService {
 	}
 	
 	public static CurrentWeatherStatus getCurrentAccuWeather(double latitude, double longitude, 
-			Language lang, String key) throws LocationNotFoundException{
+			Language lang, String key){
 		AccuWeatherService service = new AccuWeatherService().setKey(key);
 		if (lang != null){
 			service = service.setLanguage(lang).build();

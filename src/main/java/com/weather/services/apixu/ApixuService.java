@@ -19,10 +19,9 @@ import com.weather.services.language.Language;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ApixuService extends WeatherService {
-	
-	private static final String SEARCHTEXT_URL = "http://api.apixu.com/v1/search.json";
-	private static final String WEATHER_URL = "http://api.apixu.com/v1/current.json";
-	private static final String APIPARAM_NAME = "key";
+	public static final String SEARCHTEXT_URL = "http://api.apixu.com/v1/search.json";
+	public static final String WEATHER_URL = "http://api.apixu.com/v1/current.json";
+	public static final String APIPARAM_NAME = "key";
 	
 	public static final String SERVICE_NAME = "APIXU";
 	
@@ -149,7 +148,7 @@ public class ApixuService extends WeatherService {
 		Map<String, String> params = new LinkedHashMap<>();
 		params.put("q", lat + "," + lon);
 		ArrayList<Location> list= (ArrayList<Location>) getLocations(params);
-		if (list != null && !list.isEmpty()){
+		if (!list.isEmpty()){
 			return list.get(0);
 		}
 		return null;
@@ -170,10 +169,7 @@ public class ApixuService extends WeatherService {
 				}
 			}
 		} else{
-			if (response != null && response.getBody() != null)
-				throw new WeatherServiceException(response.getBody().toString());
-			else
-				throw new WeatherServiceException("Response is null");
+			throw new WeatherServiceException(response);
 		}
 		return locations;
 	}
@@ -191,7 +187,7 @@ public class ApixuService extends WeatherService {
 		Location loc = new Location();
 		loc.setLatitude(lat);
 		loc.setLongitude(lon);
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("q", loc.getLatitude() + ", " + loc.getLongitude());
 		params.put("lang", getApiLanguage().toString());
 
@@ -205,7 +201,7 @@ public class ApixuService extends WeatherService {
 	 */
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("q", site.getName());
 		params.put("lang", getApiLanguage().toString());
 
@@ -220,10 +216,7 @@ public class ApixuService extends WeatherService {
 				return responseToWeather(body, site);
 			}
 		} else{
-			if (response != null && response.getBody() != null)
-				throw new WeatherServiceException(response.getBody().toString());
-			else
-				throw new WeatherServiceException("Response is null");
+			 throw new WeatherServiceException(response);
 		}
 		return null;
 	}

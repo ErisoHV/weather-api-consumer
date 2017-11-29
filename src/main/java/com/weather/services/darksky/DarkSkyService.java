@@ -18,8 +18,7 @@ import com.weather.services.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class DarkSkyService extends WeatherService{
-	private static final String WEATHER_URL = "https://api.darksky.net/forecast/";
-	
+	public static final String WEATHER_URL = "https://api.darksky.net/forecast/";
 	public static final String SERVICE_NAME = "DARKSKY";
 
 	private DarkSkyService(DarkSkyService service){
@@ -53,7 +52,7 @@ public class DarkSkyService extends WeatherService{
 	@Override
 	public List<Location> getLocationsDataByName(String siteName) {
 		// Empty
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -78,10 +77,7 @@ public class DarkSkyService extends WeatherService{
 			}
 			
 		} else{
-			if (response != null && response.getBody() != null)
-				throw new WeatherServiceException(response.getBody().toString());
-			else
-				throw new WeatherServiceException("Response is null");
+			throw new WeatherServiceException(response);
 		}
 		return null;
 	}
