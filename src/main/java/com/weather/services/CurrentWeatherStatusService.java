@@ -56,14 +56,10 @@ public class CurrentWeatherStatusService {
 		}
 		Location loc = service.getLocationDataByGeoposition(latitude, longitude);
 		if (loc != null){
-			CurrentWeatherStatus current = service.getWeather(loc);
-			if (current != null){
-				return current;
-			}
+			return service.getWeather(loc);
 		}else{
 			throw new LocationNotFoundException();
 		}
-		return null;
 	}
 	
 	public static CurrentWeatherStatus getCurrentDarkSkyService(double latitude, double longitude, Language lang, String key){
