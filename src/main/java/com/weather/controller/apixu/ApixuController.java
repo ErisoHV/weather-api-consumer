@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.weather.model.CurrentWeatherStatus;
-import com.weather.services.CurrentWeatherStatusService;
 import com.weather.services.apixu.ApixuService;
+import com.weather.services.core.CurrentWeatherStatusService;
 import com.weather.services.language.Language;
 
 @RestController

@@ -1,4 +1,4 @@
-package com.weather.services;
+package com.weather.services.core;
 
 import java.util.HashMap;
 import java.util.Map;

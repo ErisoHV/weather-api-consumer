@@ -1,4 +1,4 @@
-package com.weather.services;
+package com.weather.services.core;
 
 import java.util.List;
 import java.util.Map;
@@ -213,13 +213,7 @@ public abstract class WeatherService {
 		}
 	}
 
-	public abstract List<Location> getLocationsDataByName(String siteName);
-	
-	public abstract Location getLocationDataByGeoposition(double lat, double lon);
-	
 	public abstract CurrentWeatherStatus getWeather(Location site);
-	
-	protected abstract Location responseToLocation(Map<String, Object> element);
 	
 	protected abstract CurrentWeatherStatus responseToWeather(Map<String, Object> element, Location loc);
 	

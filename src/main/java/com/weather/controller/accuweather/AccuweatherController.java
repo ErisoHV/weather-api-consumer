@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.weather.exception.LocationNotFoundException;
 import com.weather.model.CurrentWeatherStatus;
-import com.weather.services.CurrentWeatherStatusService;
+import com.weather.services.core.CurrentWeatherStatusService;
 import com.weather.services.language.Language;
 
 @RestController
@@ -23,9 +23,9 @@ public class AccuweatherController {
 		try{
 			CurrentWeatherStatus current = 
 					CurrentWeatherStatusService.getCurrentAccuWeather(latitude, longitude, language, key);
-			return new ResponseEntity<CurrentWeatherStatus>(current, HttpStatus.OK);
+			return new ResponseEntity<>(current, HttpStatus.OK);
 		} catch(LocationNotFoundException e){
-			return new ResponseEntity<String>("Location not found", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Location not found", HttpStatus.NOT_FOUND);
 		}
 	}
 }

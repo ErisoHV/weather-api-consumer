@@ -14,11 +14,12 @@ import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.services.WeatherService;
+import com.weather.services.core.WeatherService;
+import com.weather.services.core.interfaces.LocationData;
 import com.weather.services.language.Language;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class ApixuService extends WeatherService {
+public class ApixuService extends WeatherService implements LocationData{
 	public static final String SEARCHTEXT_URL = "http://api.apixu.com/v1/search.json";
 	public static final String WEATHER_URL = "http://api.apixu.com/v1/current.json";
 	public static final String APIPARAM_NAME = "key";
@@ -222,7 +223,7 @@ public class ApixuService extends WeatherService {
 	}
 
 	@Override
-	protected Location responseToLocation(Map<String, Object> element) {
+	public Location responseToLocation(Map<String, Object> element) {
 		Location loc = new Location();
 		loc.setServiceKey(String.valueOf(element.get("id")));
 		loc.setName((String) element.get("name"));

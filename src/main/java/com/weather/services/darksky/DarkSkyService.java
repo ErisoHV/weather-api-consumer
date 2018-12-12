@@ -13,7 +13,7 @@ import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.services.WeatherService;
+import com.weather.services.core.WeatherService;
 import com.weather.services.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -47,19 +47,6 @@ public class DarkSkyService extends WeatherService{
 		
 		return new DarkSkyService(this);
 	}
-	
-	
-	@Override
-	public List<Location> getLocationsDataByName(String siteName) {
-		// Empty
-		return new ArrayList<>();
-	}
-
-	@Override
-	public Location getLocationDataByGeoposition(double lat, double lon) {
-		// Empty
-		return null;
-	}
 
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
@@ -79,12 +66,6 @@ public class DarkSkyService extends WeatherService{
 		} else{
 			throw new WeatherServiceException(response);
 		}
-		return null;
-	}
-
-	@Override
-	protected Location responseToLocation(Map<String, Object> element) {
-		
 		return null;
 	}
 

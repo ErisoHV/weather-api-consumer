@@ -21,7 +21,7 @@ public class Application implements CommandLineRunner {
 	//@Autowired
 	//AccuWeatherService test;
 	
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 	
@@ -34,7 +34,7 @@ public class Application implements CommandLineRunner {
 									   // Example for OpenWeather: 519188
 		site.setName("Novinki");
 
-		DarkSkyService test2 = new DarkSkyService().setKey("").setLanguage(Language.es).build();
+		DarkSkyService test2 = new DarkSkyService().setKey("f53dd5b01075290f090f995f2d514964").setLanguage(Language.es).build();
 		System.out.println(test2.getWeather(site));
 	}
 }

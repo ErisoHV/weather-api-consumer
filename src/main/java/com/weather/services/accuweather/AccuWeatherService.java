@@ -15,12 +15,13 @@ import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.services.WeatherService;
+import com.weather.services.core.WeatherService;
+import com.weather.services.core.interfaces.LocationData;
 import com.weather.services.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
-public class AccuWeatherService extends WeatherService {
+public class AccuWeatherService extends WeatherService implements LocationData{
 	public static final String GEOPOSITION_URL = "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search";
 	public static final String SEARCHTEXT_URL = "http://dataservice.accuweather.com/locations/v1/search";
 	public static final String WEATHER_URL = "http://dataservice.accuweather.com/currentconditions/v1/";
@@ -121,7 +122,7 @@ public class AccuWeatherService extends WeatherService {
 	}
 
 	@Override
-	protected Location responseToLocation(Map<String, Object> element){
+	public Location responseToLocation(Map<String, Object> element){
 		Location loc = new Location();
 		loc.setName((String) element.get(fields.EnglishName.toString()));
 		loc.setLocalizedName((String) element.get(fields.LocalizedName.toString()));

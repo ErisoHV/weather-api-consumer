@@ -1,7 +1,6 @@
 package com.weather.services.openweather;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.services.WeatherService;
+import com.weather.services.core.WeatherService;
 import com.weather.services.language.Language;
 
 /**
@@ -61,17 +60,6 @@ public class OpenWeatherService extends WeatherService{
 		return new OpenWeatherService(this);
 	}
 	
-	
-	@Override
-	public List<Location> getLocationsDataByName(String siteName) {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public Location getLocationDataByGeoposition(double lat, double lon) {
-		return null;
-	}
-
 	@Override
 	public CurrentWeatherStatus getWeather(Location site) {
 		validateApiQueryParam();
@@ -95,11 +83,6 @@ public class OpenWeatherService extends WeatherService{
 		} else{
 			LOGGER.error("[AccuWeatherService -> getLocationsDataByName] ERROR = " + response);
 		}
-		return null;
-	}
-
-	@Override
-	protected Location responseToLocation(Map<String, Object> element) {
 		return null;
 	}
 
