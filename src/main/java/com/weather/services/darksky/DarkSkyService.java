@@ -14,7 +14,7 @@ import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.core.WeatherService;
-import com.weather.services.language.Language;
+import com.weather.services.core.common.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class DarkSkyService extends WeatherService{
@@ -32,12 +32,14 @@ public class DarkSkyService extends WeatherService{
 	}
 
 	public DarkSkyService setKey(String apiKey) {
-		this.setApiKey(apiKey);
+		setApiKey(apiKey);
 		return this;
 	}
 	
 	public DarkSkyService setLanguage(Language lang){
-		setApiLanguage(lang);
+		if (lang != null)
+			setApiLanguage(lang);
+		
 		return this;
 	}
 	

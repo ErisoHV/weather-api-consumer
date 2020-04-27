@@ -16,8 +16,8 @@ import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.core.WeatherService;
+import com.weather.services.core.common.language.Language;
 import com.weather.services.core.interfaces.LocationData;
-import com.weather.services.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
@@ -71,7 +71,8 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 	}
 	
 	public AccuWeatherService setLanguage(Language lang){
-		setApiLanguage(lang);
+		if (lang != null)
+			setApiLanguage(lang);
 		return this;
 	}
 	
@@ -168,13 +169,27 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		
 		return null;
 	}
+	
+	private String getWeatherIcon(String iconId) {
+		if (iconId != null && !iconId.isEmpty()) {
+			if (iconId.length() == 1) {
+				return "0" + iconId + "-s.png";
+			} else {
+				return iconId + "-s.png";
+			}
+		}
+		return "";
+	}
 
 	@Override
 	protected CurrentWeatherStatus responseToWeather(Map<String, Object> element, Location loc) {
 		CurrentWeatherStatus weather = new CurrentWeatherStatus();
 		weather.setEpochTime(new Timestamp(Long.valueOf((Integer) element.get(fields.EpochTime.toString()))));
 		weather.setWeatherDescription((String) element.get(fields.WeatherText.toString()));
-		weather.setWeatherIcon(String.valueOf((Integer) element.get(fields.WeatherIcon.toString())));
+		
+		String icon = String.valueOf((Integer) element.get(fields.WeatherIcon.toString()));
+		weather.setWeatherIcon(getWeatherIcon(icon));
+		
 		Map<String, Map<String, Object>> subElement = 
 				(Map<String, Map<String, Object>>) element.get(fields.Temperature.toString());
 		if (subElement != null && subElement.get(fields.Metric.toString())  != null){

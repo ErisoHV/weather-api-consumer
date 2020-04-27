@@ -7,8 +7,8 @@ import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.accuweather.AccuWeatherService;
 import com.weather.services.apixu.ApixuService;
+import com.weather.services.core.common.language.Language;
 import com.weather.services.darksky.DarkSkyService;
-import com.weather.services.language.Language;
 
 @Service
 public class CurrentWeatherStatusService {
@@ -19,10 +19,8 @@ public class CurrentWeatherStatusService {
 	
 	public static CurrentWeatherStatus getCurrentAccuWeather(double latitude, double longitude, 
 			Language lang, String key){
-		AccuWeatherService service = new AccuWeatherService().setKey(key);
-		if (lang != null){
-			service = service.setLanguage(lang).build();
-		}
+		AccuWeatherService service = new AccuWeatherService()
+				.setKey(key).setLanguage(lang).build();
 		Location loc = service.getLocationDataByGeoposition(latitude, longitude);
 		if (loc != null){
 			return service.getWeather(loc);
@@ -31,12 +29,10 @@ public class CurrentWeatherStatusService {
 		}
 	}
 	
-	public static CurrentWeatherStatus getCurrentDarkSkyService(double latitude, double longitude, Language lang, String key){
-		DarkSkyService service = new DarkSkyService().setKey(key);
-		
-		if (lang != null)
-			service = service.setLanguage(lang).build();
-		
+	public static CurrentWeatherStatus getCurrentDarkSkyService(double latitude, double longitude, 
+			Language lang, String key){
+		DarkSkyService service = new DarkSkyService().setKey(key).setLanguage(lang).build();
+
 		Location loc = new Location();
 		loc.setLatitude(latitude);
 		loc.setLongitude(longitude);
@@ -46,12 +42,8 @@ public class CurrentWeatherStatusService {
 	
 	public static CurrentWeatherStatus getApixuService(double latitude, double longitude, Language lang, 
 			String key, ApixuService.Velocity vel, ApixuService.Temperature temp, ApixuService.Volume vol){
-		ApixuService service = new ApixuService().setKey(key);
-		if (lang != null)
-			service = service.setLanguage(lang).build();
-		
-		if (vel != null)
-			service = service.setWindUnit(vel);
+		ApixuService service = new ApixuService().setKey(key)
+				.setLanguage(lang).setWindUnit(vel);
 		
 		if (temp != null)
 			service = service.setTempUnit(temp);

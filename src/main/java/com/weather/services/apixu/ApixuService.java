@@ -10,13 +10,14 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.weather.exception.WeatherIlegalParameterException;
 import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.services.core.WeatherService;
+import com.weather.services.core.WeatherService;
+import com.weather.services.core.common.language.Language;
 import com.weather.services.core.interfaces.LocationData;
-import com.weather.services.language.Language;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ApixuService extends WeatherService implements LocationData{
@@ -87,6 +88,10 @@ public class ApixuService extends WeatherService implements LocationData{
 	}
 	
 	public ApixuService setLanguage(Language lang){
+		if (lang == null || (lang != null && Language.parse(lang.toString()) == null)) {
+			throw new WeatherIlegalParameterException("languaje", Language.getValuesArray());
+		}
+			
 		setApiLanguage(lang);
 		return this;
 	}

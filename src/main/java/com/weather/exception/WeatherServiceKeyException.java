@@ -3,8 +3,9 @@ package com.weather.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value=HttpStatus.FORBIDDEN, reason="The Service Key cannot be null, missing key")
-public class WeatherServiceKeyException extends RuntimeException{
+@ResponseStatus(value=HttpStatus.BAD_REQUEST, 
+	reason="The Service Key cannot be null, missing key")
+public class WeatherServiceKeyException extends RuntimeException {
 
 	/**
 	 * 

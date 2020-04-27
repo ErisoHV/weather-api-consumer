@@ -1,4 +1,8 @@
-package com.weather.services.language;
+package com.weather.services.core.common.language;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public enum Language {
 	ar, 				// Arabic	
@@ -45,5 +49,16 @@ public enum Language {
 	zh_wuu,				// Wu (Shanghainese)	
 	zh_hsn,				// Xiang
 	zh_yue,				// Yue (Cantonese)
-	zuZulu
+	zuZulu;
+	
+	public static List<String> getValuesArray() {
+		return Arrays.asList(values()).stream()
+				.map(Language::toString).collect(Collectors.toList());
+	}
+	
+	public static Language parse(String lang) {
+		return Arrays.asList(values()).stream()
+				.filter(lan -> lan.toString().equals(lang)).findFirst().orElse(null);
+	}
+	
 }

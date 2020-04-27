@@ -5,14 +5,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.services.core.WeatherService;
-import com.weather.services.language.Language;
+import com.weather.services.core.common.language.Language;
 
 /**
  * https://openweathermap.org
@@ -28,7 +29,7 @@ public class OpenWeatherService extends WeatherService{
 	
 	public static final String SERVICE_NAME = "OPENWEATHER";
 	
-	private static final Logger LOGGER = Logger.getLogger(OpenWeatherService.class);
+	private  static final Logger LOGGER = LoggerFactory.getLogger(OpenWeatherService.class);
 	
 	private OpenWeatherService(OpenWeatherService open){
 		super(open.getApiKey(), APIPARAM_NAME);
@@ -46,9 +47,6 @@ public class OpenWeatherService extends WeatherService{
 
 
 	public OpenWeatherService setKey(String apiKey) {
-		if (isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty");
-		
 		this.setApiKey(apiKey);
 		return this;
 	}

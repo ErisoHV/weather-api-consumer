@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -16,7 +17,7 @@ import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
-import com.weather.services.language.Language;
+import com.weather.services.core.common.language.Language;
 
 public abstract class WeatherService {
 	private String apiKey;
@@ -24,7 +25,7 @@ public abstract class WeatherService {
 	private boolean isByApiQueryParam = true;
 	private Language apiLanguage;
 	
-	private  static final Logger LOGGER = Logger.getLogger(WeatherService.class);
+	private  static final Logger LOGGER = LoggerFactory.getLogger(WeatherService.class);
 	
 	protected WeatherService(){
 		
@@ -40,9 +41,6 @@ public abstract class WeatherService {
 	}
 
 	protected void setApiKey(String apiKey) {
-		if (isValidKey())
-		    throw new WeatherServiceKeyException();
-		
 		this.apiKey = apiKey;
 	}
 	
