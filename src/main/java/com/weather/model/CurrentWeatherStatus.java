@@ -15,6 +15,26 @@ public class CurrentWeatherStatus {
 	private double precipitation;
 	private String weatherServiceName;
 	
+	public CurrentWeatherStatus() {
+		// Empty
+	}
+	
+	public CurrentWeatherStatus(Location location, Timestamp epochTime, String weatherDescription, String weatherIcon,
+			double temperature, double realFeelTemperature, String windDirection, double windSpeed,
+			double precipitation, String weatherServiceName) {
+		super();
+		this.location = location;
+		this.epochTime = epochTime;
+		this.weatherDescription = weatherDescription;
+		this.weatherIcon = weatherIcon;
+		this.temperature = temperature;
+		this.realFeelTemperature = realFeelTemperature;
+		this.windDirection = windDirection;
+		this.windSpeed = windSpeed;
+		this.precipitation = precipitation;
+		this.weatherServiceName = weatherServiceName;
+	}
+
 	public Location getLocation() {
 		return location;
 	}

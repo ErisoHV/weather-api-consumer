@@ -8,61 +8,43 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponents;
 
 import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
+import com.weather.model.WeatherRequest;
 import com.weather.services.core.WeatherService;
-import com.weather.services.core.common.language.Language;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
+@Service
 public class DarkSkyService extends WeatherService{
 	public static final String WEATHER_URL = "https://api.darksky.net/forecast/";
 	public static final String SERVICE_NAME = "DARKSKY";
 
-	private DarkSkyService(DarkSkyService service){
-		super(service.getApiKey(), "");
-		setByApiQueryParam(false);
-		setApiLanguage(service.getApiLanguage());
-	}
-	
-	public DarkSkyService() {
-		setApiLanguage(Language.en);
-	}
-
-	public DarkSkyService setKey(String apiKey) {
-		setApiKey(apiKey);
-		return this;
-	}
-	
-	public DarkSkyService setLanguage(Language lang){
-		if (lang != null)
-			setApiLanguage(lang);
-		
-		return this;
-	}
-	
-	public DarkSkyService build(){
-		if (!isValidKey())
+	@Override
+	public CurrentWeatherStatus getWeather(WeatherRequest request) {
+		if (request.getKey() == null || request.getKey().isEmpty())
 			throw new WeatherServiceKeyException();
 		
-		return new DarkSkyService(this);
-	}
-
-	@Override
-	public CurrentWeatherStatus getWeather(Location site) {
 		List<String> params = new ArrayList<>();
-		params.add(site.getLatitude() + "," + site.getLongitude());
+		params.add(request.getLocation().getLatitude() 
+				+ "," + request.getLocation().getLongitude());
 		
 		Map<String, String> queryParams = new HashMap<>();
-		queryParams.put("lang", getApiLanguage().toString());
+		if (request.getLanguage() != null && !request.getLanguage().toString().isEmpty())
+			queryParams.put("lang", request.getLanguage().toString());
 		
-		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(WEATHER_URL, queryParams, params);
+		setApiKey(request.getKey());
+		
+		ResponseEntity<Map> response 
+			= getAPIWeatherResponseEntityMap(WEATHER_URL, queryParams, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			Map<String, Object> body = response.getBody();
 			if (body != null && !body.isEmpty()){
-				return responseToWeather(body, site);
+				return responseToWeather(body, request.getLocation());
 			}
 			
 		} else{
@@ -87,5 +69,11 @@ public class DarkSkyService extends WeatherService{
 		weather.setLocation(loc);
 		
 		return weather;
+	}
+	
+	private ResponseEntity<Map> getAPIWeatherResponseEntityMap(String url, 
+			Map<String, String> urlParams, List<String> pathParams){
+		UriComponents urlBuilded = buildURLParameters(url, urlParams, pathParams);
+		return getAPIWeatherResponseEntityMap(urlBuilded);
 	}
 }

@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.weather.model.Location;
+import com.weather.model.WeatherRequest;
 
 public interface LocationData {
 	
-	public List<Location> getLocationsDataByName(String siteName);
+	public List<Location> getLocationsDataByName(WeatherRequest request);
 	
-	public Location getLocationDataByGeoposition(double lat, double lon);
+	public Location getLocationDataByGeoposition(WeatherRequest request);
 	
 	public Location responseToLocation(Map<String, Object> element);
 	

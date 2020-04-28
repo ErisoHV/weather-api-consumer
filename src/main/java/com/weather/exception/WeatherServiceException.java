@@ -13,6 +13,8 @@ public class WeatherServiceException extends RuntimeException{
 	public <T> WeatherServiceException(ResponseEntity<T> response) {
 		if (response == null)
 			throw new RestClientException("Response is null");
+		if (response.getBody() == null)
+			throw new RestClientException("Response body is null");
 		else
 			throw new RestClientException(response.getBody().toString());
 	}

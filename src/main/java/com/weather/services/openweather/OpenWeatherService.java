@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
+import com.weather.model.WeatherRequest;
 import com.weather.services.core.WeatherService;
-import com.weather.services.core.common.language.Language;
 
 /**
  * https://openweathermap.org
@@ -31,44 +31,19 @@ public class OpenWeatherService extends WeatherService{
 	
 	private  static final Logger LOGGER = LoggerFactory.getLogger(OpenWeatherService.class);
 	
-	private OpenWeatherService(OpenWeatherService open){
-		super(open.getApiKey(), APIPARAM_NAME);
-		setByApiQueryParam(true);
-	}
-	
-	public OpenWeatherService() {
-		// Empty Constructor
-	}
-	
-	public OpenWeatherService setLanguage(Language language){
-		setApiLanguage(language);
-		return this;
-	}
-
-
-	public OpenWeatherService setKey(String apiKey) {
-		this.setApiKey(apiKey);
-		return this;
-	}
-	
-	public OpenWeatherService build(){
-		if (!isValidKey())
-			throw new IllegalArgumentException("apiKey cannot be null or empty");
-		
-		return new OpenWeatherService(this);
-	}
 	
 	@Override
-	public CurrentWeatherStatus getWeather(Location site) {
-		validateApiQueryParam();
+	public CurrentWeatherStatus getWeather(WeatherRequest request) {
 		Map<String, String> params = new LinkedHashMap<>();
-		if (site.getServiceKey() != null && site.getServiceKey().isEmpty()){
-			params.put("id", site.getServiceKey());
-		} else if (site.getLatitude() != null && site.getLongitude() != null){
-			params.put ("lat", String.valueOf(site.getLatitude()));
-			params.put ("lon", String.valueOf(site.getLongitude()));
-		} else if (site.getName() != null && !site.getName().isEmpty()){
-			params.put("q", site.getName());
+		if (request.getKey() != null && request.getKey().isEmpty()){
+			params.put("id", request.getKey());
+		} else if (request.getLocation().getLatitude() != null 
+				&& request.getLocation().getLongitude() != null){
+			params.put ("lat", String.valueOf(request.getLocation().getLatitude()));
+			params.put ("lon", String.valueOf(request.getLocation().getLongitude()));
+		} else if (request.getLocation().getName() != null 
+				&& !request.getLocation().getName().isEmpty()){
+			params.put("q", request.getLocation().getName());
 		} else{
 			throw new IllegalArgumentException("Invalid Location");
 		}
@@ -76,7 +51,7 @@ public class OpenWeatherService extends WeatherService{
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			Map<String, Object> body = response.getBody();
 			if (body != null && !body.isEmpty()){
-				return responseToWeather(body, site);
+				return responseToWeather(body, request.getLocation());
 			}
 		} else{
 			LOGGER.error("[AccuWeatherService -> getLocationsDataByName] ERROR = " + response);

@@ -11,12 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.weather.exception.LocationNotFoundException;
 import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
+import com.weather.model.WeatherRequest;
 import com.weather.services.core.WeatherService;
-import com.weather.services.core.common.language.Language;
 import com.weather.services.core.interfaces.LocationData;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -55,40 +56,16 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		RealFeelTemperature
 	}
 	
-	private AccuWeatherService(AccuWeatherService accu){
-		super(accu.getApiKey(), APIPARAM_NAME);
-		setByApiQueryParam(true);
-		setApiLanguage(accu.getApiLanguage());
-	}
-	
-	public AccuWeatherService() {
-		setApiLanguage(Language.en); // default language
-	}
 
-	public AccuWeatherService setKey(String apiKey) {
-		setApiKey(apiKey);
-		return this;
-	}
-	
-	public AccuWeatherService setLanguage(Language lang){
-		if (lang != null)
-			setApiLanguage(lang);
-		return this;
-	}
-	
-	public AccuWeatherService build(){
-		if (!isValidKey())
-			throw new WeatherServiceKeyException();
-		return new AccuWeatherService(this);
-	}
-	
 	@Override
-	public List<Location> getLocationsDataByName(String siteName) {
-		validateApiQueryParam();
+	public List<Location> getLocationsDataByName(WeatherRequest request) {
+		if (request.getKey() == null || request.getKey().isEmpty())
+			throw new WeatherServiceKeyException();
+		
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put("q", siteName);
+		params.put("q", request.getLocation().getName());
 		params.put("details", "false");
-		params.put("language", getApiLanguage().toString());
+		params.put("language", request.getLanguage().toString());
 		
 		ResponseEntity<List> response = getAPIWeatherResponseEntityList(SEARCHTEXT_URL, params);
 		List<Location> locations = new ArrayList<>();
@@ -108,13 +85,20 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 	}
 
 	@Override
-	public Location getLocationDataByGeoposition(double lat, double lon) {
-		validateApiQueryParam();
+	public Location getLocationDataByGeoposition(WeatherRequest request) {
+		if (request.getKey() == null || request.getKey().isEmpty())
+			throw new WeatherServiceKeyException();
+		
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put("q", lat + "," + lon);
+		params.put("q", request.getLocation().getLatitude() 
+				+ "," + request.getLocation().getLongitude());
 		params.put("details", "false");
-		params.put("language", getApiLanguage().toString());
-		ResponseEntity<Map> response = getAPIWeatherResponseEntityMap(GEOPOSITION_URL, params);
+		if (request.getLanguage() != null)
+			params.put("language", request.getLanguage().toString());
+		setApiParamName(APIPARAM_NAME);
+		setApiKey(request.getKey());
+		ResponseEntity<Map> response 
+				= getAPIWeatherResponseEntityMap(GEOPOSITION_URL, params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());
 		} else{
@@ -124,6 +108,10 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public Location responseToLocation(Map<String, Object> element){
+		
+		if (element == null)
+			throw new LocationNotFoundException();
+		
 		Location loc = new Location();
 		loc.setName((String) element.get(fields.EnglishName.toString()));
 		loc.setLocalizedName((String) element.get(fields.LocalizedName.toString()));
@@ -151,16 +139,20 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 	}
 
 	@Override
-	public CurrentWeatherStatus getWeather(Location site) {
-		validateApiQueryParam();
+	public CurrentWeatherStatus getWeather(WeatherRequest request) {
+		if (request.getKey() == null || request.getKey().isEmpty())
+			throw new WeatherServiceKeyException();
+		
 		Map<String, String> params = new HashMap<>();
 		params.put("details", "true");
-		params.put("language", getApiLanguage().toString());
-		ResponseEntity<List> response = getAPIWeatherResponseEntityList(WEATHER_URL + site.getServiceKey(), params);
+		if (request.getLanguage() != null)
+			params.put("language", request.getLanguage().toString());
+		ResponseEntity<List> response = getAPIWeatherResponseEntityList(WEATHER_URL 
+				+ request.getLocation().getServiceKey(), params);
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			List<Map<String, Object>> body = response.getBody();
 			if (body != null && !body.isEmpty()){
-				return responseToWeather(body.get(0), site);
+				return responseToWeather(body.get(0), request.getLocation());
 			}
 			
 		} else{
