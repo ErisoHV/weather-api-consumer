@@ -44,16 +44,14 @@ public class AccuweatherController {
 		String message = null;
 		try {
 			current = service.getCurrentAccuWeather(latitude, longitude, language, key);
-			response.setWeather(current);
 		} catch (LocationNotFoundException e) {
 			status = HttpStatus.NOT_FOUND;
-			current = null;
 			message = "Location not found: [" + longitude + "," + latitude + "]";
 		} catch (WeatherServiceKeyException | WeatherServiceException e) {
 			status = HttpStatus.BAD_REQUEST;
-			current = null;
 			message = e.getMessage();
 		}
+		response.setWeather(current);
 		response.setStatus(status);
 		response.setMessage(message);
 		return new ResponseEntity<WeatherResponse>(response, status);

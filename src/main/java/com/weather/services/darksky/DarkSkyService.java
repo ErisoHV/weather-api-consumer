@@ -61,7 +61,7 @@ public class DarkSkyService extends WeatherService{
 			weather.setEpochTime(new Timestamp(Long.valueOf((Integer)map.get("time"))));
 			weather.setWeatherDescription((String) map.get("summary"));
 			weather.setWeatherIcon((String) map.get("icon"));
-			weather.setPrecipitation((int) map.get("precipIntensity"));
+			weather.setPrecipitation((double) map.get("precipIntensity"));
 			weather.setTemperature((double) map.get("temperature"));
 			weather.setWindSpeed((double) map.get("windSpeed"));
 		}
