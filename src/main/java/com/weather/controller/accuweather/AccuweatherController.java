@@ -39,23 +39,24 @@ public class AccuweatherController {
 		
 		WeatherResponse response = new WeatherResponse();
 		response.setService(AccuWeatherService.SERVICE_NAME);
+		CurrentWeatherStatus current = null;
+		HttpStatus status = HttpStatus.OK;
+		String message = null;
 		try {
-			CurrentWeatherStatus current = service.getCurrentAccuWeather(latitude, 
-					longitude, language, key);
+			current = service.getCurrentAccuWeather(latitude, longitude, language, key);
 			response.setWeather(current);
-			response.setStatus(HttpStatus.OK);
-			return new ResponseEntity<WeatherResponse>(response, HttpStatus.OK);
 		} catch (LocationNotFoundException e) {
-			response.setWeather(null);
-			response.setStatus(HttpStatus.NOT_FOUND);
-			response.setMessage("Location not found: [" + longitude + "," + latitude + "]");
-			return new ResponseEntity<WeatherResponse>(response, HttpStatus.NOT_FOUND);
+			status = HttpStatus.NOT_FOUND;
+			current = null;
+			message = "Location not found: [" + longitude + "," + latitude + "]";
 		} catch (WeatherServiceKeyException | WeatherServiceException e) {
-			response.setWeather(null);
-			response.setStatus(HttpStatus.BAD_REQUEST);
-			response.setMessage(e.getMessage());
-			return new ResponseEntity<WeatherResponse>(response, HttpStatus.BAD_REQUEST);
+			status = HttpStatus.BAD_REQUEST;
+			current = null;
+			message = e.getMessage();
 		}
+		response.setStatus(status);
+		response.setMessage(message);
+		return new ResponseEntity<WeatherResponse>(response, status);
 	}
 
 	public AccuweatherController(CurrentWeatherStatusService service) {
