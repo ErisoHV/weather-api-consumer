@@ -16,13 +16,13 @@ import com.weather.services.darksky.DarkSkyService;
 public class CurrentWeatherStatusService {
 
 	@Autowired
-	DarkSkyService darkSkyService;
+	private DarkSkyService darkSkyService;
 	
 	@Autowired
-	AccuWeatherService accuweatherService;
+	private AccuWeatherService accuweatherService;
 	
 	@Autowired
-	ApixuService apixuService;
+	private ApixuService apixuService;
 
 	
 	public CurrentWeatherStatus getCurrentAccuWeather(double latitude, double longitude, 
@@ -38,7 +38,7 @@ public class CurrentWeatherStatusService {
 		
 		if (request.getLocation() != null){
 			return accuweatherService.getWeather(request);
-		}else{
+		} else {
 			throw new LocationNotFoundException();
 		}
 	}

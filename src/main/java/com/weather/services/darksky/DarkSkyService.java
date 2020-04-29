@@ -48,7 +48,7 @@ public class DarkSkyService extends WeatherService{
 			}
 			
 		} else{
-			throw new WeatherServiceException(response);
+			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
 		}
 		return null;
 	}

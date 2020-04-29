@@ -79,7 +79,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 				}
 			}
 		} else{
-			throw new WeatherServiceException(response);
+			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
 		}
 		return locations;
 	}
@@ -102,7 +102,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
 			return responseToLocation(response.getBody());
 		} else{
-			throw new WeatherServiceException(response);
+			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
 		}
 	}
 
@@ -156,7 +156,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 			}
 			
 		} else{
-			throw new WeatherServiceException(response);
+			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
 		}
 		
 		return null;

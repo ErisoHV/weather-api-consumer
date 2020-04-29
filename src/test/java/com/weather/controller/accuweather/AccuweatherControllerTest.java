@@ -14,19 +14,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.weather.exception.LocationNotFoundException;
+import com.weather.exception.WeatherServiceException;
+import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
+import com.weather.model.WeatherResponse;
 import com.weather.services.CurrentWeatherStatusService;
+import com.weather.services.accuweather.AccuWeatherService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccuweatherControllerTest {
 
 	@Mock
-	CurrentWeatherStatusService service;
+	private CurrentWeatherStatusService service;
 	
-	CurrentWeatherStatus current;
+	private CurrentWeatherStatus current;
 	
-	AccuweatherController controller;
+	private AccuweatherController controller;
+	
+	private WeatherResponse response;
+	
 	@Before
 	public void configure() {
 		current = new CurrentWeatherStatus();
@@ -36,11 +43,16 @@ public class AccuweatherControllerTest {
 		current.setTemperature(16);
 		current.setWeatherServiceName("ACCUWEATHER");
 		controller = new AccuweatherController(service);
+		
+		response = new WeatherResponse();
+		response.setWeather(current);
+		response.setStatus(HttpStatus.OK);
+		response.setService(AccuWeatherService.SERVICE_NAME);
 	}
 	
 	
 	@Test
-	public void testGetCurrentWeatherController_notNull_test() {
+	public void getCurrentWeather_weatherIsnotNull_test() {
 		when(service
 				.getCurrentAccuWeather(
 				Mockito.anyDouble(), 
@@ -49,16 +61,17 @@ public class AccuweatherControllerTest {
 				Mockito.any()))
 			.thenReturn(current);
 		
-		ResponseEntity<?> currentWeather 
-			= controller.getCurrentWeather("key", -75.6373785784056, 
-					6.27780191817659, null);
+		ResponseEntity<WeatherResponse> currentWeather 
+				= controller.getCurrentWeather("key", -75.6373785784056, 6.27780191817659, null);
 		assertThat(currentWeather, Matchers.notNullValue());
 		assertThat(currentWeather.getStatusCode(), Matchers.is(HttpStatus.OK));
 		assertThat(currentWeather.getBody(), Matchers.notNullValue());
+		assertThat(currentWeather.getBody().getWeather(), Matchers.notNullValue());
+		assertThat(currentWeather.getBody().getService(), Matchers.is(AccuWeatherService.SERVICE_NAME));
 	}
 	
 	@Test
-	public void testGetCurrentWeatherController_null_test() {
+	public void getCurrentWeatherController_wheatherIsNull_test() {
 		when(service
 				.getCurrentAccuWeather(
 				Mockito.anyDouble(), 
@@ -67,16 +80,18 @@ public class AccuweatherControllerTest {
 				Mockito.any()))
 			.thenReturn(null);
 		
-		ResponseEntity<?> currentWeather 
+		ResponseEntity<WeatherResponse> currentWeather 
 			= controller.getCurrentWeather("key", -75.6373785784056, 
 					6.27780191817659, null);
 		assertThat(currentWeather, Matchers.notNullValue());
 		assertThat(currentWeather.getStatusCode(), Matchers.is(HttpStatus.OK));
-		assertThat(currentWeather.getBody(), Matchers.nullValue());	
+		assertThat(currentWeather.getBody(), Matchers.notNullValue());
+		assertThat(currentWeather.getBody().getWeather(), Matchers.nullValue());
+		
 	}
 	
 	@Test
-	public void testGetCurrentWeatherController_error_test() {
+	public void getCurrentWeatherController_locationNotFoundError_test() {
 		when(service
 				.getCurrentAccuWeather(
 				Mockito.anyDouble(), 
@@ -85,12 +100,57 @@ public class AccuweatherControllerTest {
 				Mockito.any()))
 		.thenThrow(LocationNotFoundException.class);
 		
-		ResponseEntity<?> currentWeather 
+		ResponseEntity<WeatherResponse> currentWeather 
 			= controller.getCurrentWeather("key", -75.6373785784056, 
 					6.27780191817659, null);
 		assertThat(currentWeather, Matchers.notNullValue());
 		assertThat(currentWeather.getStatusCode(), Matchers.is(HttpStatus.NOT_FOUND));
-		assertThat(currentWeather.getBody(), Matchers.is("{\"error\" : \"Location not found\"}"));	
+		assertThat(currentWeather.getBody(), Matchers.notNullValue());
+		assertThat(currentWeather.getBody().getWeather(), Matchers.nullValue());
+		assertThat(currentWeather.getBody().getMessage(), 
+				Matchers.is("Location not found: [-75.6373785784056,6.27780191817659]"));
+	}
+	
+	@Test
+	public void getCurrentWeatherController_weatherServiceKeyError_test() {
+		when(service
+				.getCurrentAccuWeather(
+				Mockito.anyDouble(), 
+				Mockito.anyDouble(), 
+				Mockito.any(), 
+				Mockito.any()))
+		.thenThrow(new WeatherServiceKeyException());
+		
+		ResponseEntity<WeatherResponse> currentWeather 
+			= controller.getCurrentWeather("key", -75.6373785784056, 
+					6.27780191817659, null);
+		assertThat(currentWeather, Matchers.notNullValue());
+		assertThat(currentWeather.getStatusCode(), Matchers.is(HttpStatus.BAD_REQUEST));
+		assertThat(currentWeather.getBody(), Matchers.notNullValue());
+		assertThat(currentWeather.getBody().getWeather(), Matchers.nullValue());
+		assertThat(currentWeather.getBody().getMessage(), 
+				Matchers.is("The Service Key cannot be null, missing key"));
+	}
+	
+	@Test
+	public void getCurrentWeatherController_weatherServiceError_test() {
+		when(service
+				.getCurrentAccuWeather(
+				Mockito.anyDouble(), 
+				Mockito.anyDouble(), 
+				Mockito.any(), 
+				Mockito.any()))
+		.thenThrow(new WeatherServiceException("Error"));
+		
+		ResponseEntity<WeatherResponse> currentWeather 
+			= controller.getCurrentWeather("key", -75.6373785784056, 
+					6.27780191817659, null);
+		assertThat(currentWeather, Matchers.notNullValue());
+		assertThat(currentWeather.getStatusCode(), Matchers.is(HttpStatus.BAD_REQUEST));
+		assertThat(currentWeather.getBody(), Matchers.notNullValue());
+		assertThat(currentWeather.getBody().getWeather(), Matchers.nullValue());
+		assertThat(currentWeather.getBody().getMessage(), 
+				Matchers.is("Error"));
 	}
 	
 }
