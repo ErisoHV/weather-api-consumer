@@ -19,4 +19,9 @@ public class WeatherIlegalParameterException extends IllegalArgumentException{
 				+ String.join(", ", validValues));
 	}
 	
+	public WeatherIlegalParameterException(String parameter, String description) {
+		super("Invalid request parameter: " + parameter + ". Value must be: "
+				+ description);
+	}
+	
 }

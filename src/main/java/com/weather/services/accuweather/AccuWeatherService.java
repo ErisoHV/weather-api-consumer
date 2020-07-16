@@ -19,6 +19,7 @@ import com.weather.model.Location;
 import com.weather.model.WeatherRequest;
 import com.weather.services.core.WeatherService;
 import com.weather.services.core.interfaces.LocationData;
+import com.weather.utils.ResquestUtils;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
@@ -59,7 +60,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public List<Location> getLocationsDataByName(WeatherRequest request) {
-		if (request.getKey() == null || request.getKey().isEmpty())
+		if (!ResquestUtils.isOKWeatherRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		Map<String, String> params = new LinkedHashMap<>();
@@ -86,12 +87,11 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public Location getLocationDataByGeoposition(WeatherRequest request) {
-		if (request.getKey() == null || request.getKey().isEmpty())
+		if (!ResquestUtils.isOKWeatherRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put("q", request.getLocation().getLatitude() 
-				+ "," + request.getLocation().getLongitude());
+		params.put("q", ResquestUtils.getCommaSeparatedLocationFromRequest(request));
 		params.put("details", "false");
 		if (request.getLanguage() != null)
 			params.put("language", request.getLanguage().toString());
@@ -140,7 +140,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public CurrentWeatherStatus getWeather(WeatherRequest request) {
-		if (request.getKey() == null || request.getKey().isEmpty())
+		if (!ResquestUtils.isOKWeatherRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		Map<String, String> params = new HashMap<>();
@@ -175,6 +175,18 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	protected CurrentWeatherStatus responseToWeather(Map<String, Object> element, Location loc) {
+		CurrentWeatherStatus weather = buildWeatherStatus(element, loc);
+
+		setTemperatureFromElement(weather, element);
+		
+		setWindFromElement(weather, element);
+		
+		setPrecipitationFromElement(weather, element);
+		
+		return weather;
+	}
+	
+	private CurrentWeatherStatus buildWeatherStatus(Map<String, Object> element, Location loc) {
 		CurrentWeatherStatus weather = new CurrentWeatherStatus();
 		weather.setEpochTime(new Timestamp(Long.valueOf((Integer) element.get(fields.EpochTime.toString()))));
 		weather.setWeatherDescription((String) element.get(fields.WeatherText.toString()));
@@ -182,6 +194,14 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		String icon = String.valueOf((Integer) element.get(fields.WeatherIcon.toString()));
 		weather.setWeatherIcon(getWeatherIcon(icon));
 		
+		weather.setWeatherServiceName(SERVICE_NAME);
+		weather.setWeatherServiceName(this.getClass().getSimpleName());
+		weather.setLocation(loc);
+		
+		return weather;
+	}
+	
+	private void setTemperatureFromElement(CurrentWeatherStatus weather, Map<String, Object> element) {
 		Map<String, Map<String, Object>> subElement = 
 				(Map<String, Map<String, Object>>) element.get(fields.Temperature.toString());
 		if (subElement != null && subElement.get(fields.Metric.toString())  != null){
@@ -191,7 +211,11 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		if (subElement != null && subElement.get(fields.Metric.toString()) != null){
 			weather.setRealFeelTemperature((double) subElement.get(fields.Metric.toString()).get(fields.Value.toString()));
 		}
-		subElement = (Map<String, Map<String, Object>>) element.get(fields.Wind.toString());
+	}
+	
+	private void setWindFromElement (CurrentWeatherStatus weather, Map<String, Object> element) {
+		Map<String, Map<String, Object>> subElement 
+				= (Map<String, Map<String, Object>>) element.get(fields.Wind.toString());
 		if (subElement != null){
 			if (subElement.get(fields.Direction.toString()) != null){
 				weather.setWindDirection((String) subElement.get(fields.Direction.toString()).get(fields.Localized.toString()));
@@ -203,7 +227,11 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 				weather.setWindSpeed((double) subSubElement.get(fields.Value.toString()));
 			}
 		}
-		subElement = (Map<String, Map<String, Object>>) element.get(fields.PrecipitationSummary.toString());
+	}
+	
+	private void setPrecipitationFromElement(CurrentWeatherStatus weather, Map<String, Object> element) {
+		Map<String, Map<String, Object>> subElement 
+				= (Map<String, Map<String, Object>>) element.get(fields.PrecipitationSummary.toString());
 		if (subElement != null){
 			Map<String, Map<String, Object>> subSubElement = 
 					(Map<String, Map<String, Object>>) element.get((fields.PrecipitationSummary.toString()));
@@ -213,10 +241,5 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 				 weather.setPrecipitation((double) subSubSubElement.get(fields.Value.toString()));
 			}
 		}
-		weather.setWeatherServiceName(SERVICE_NAME);
-		weather.setLocation(loc);
-		weather.setWeatherServiceName(this.getClass().getSimpleName());
-		
-		return weather;
 	}
 }
