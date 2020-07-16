@@ -2,6 +2,11 @@ language: java
 sudo: false
 script: mvn clean verify
 
+env:
+  global:
+     # clode climate test coverage report
+     secure: "NVzkbhL1UjXeFQLAGfPH8MLe4VgWOCqljQHWEGGHbpAe6lGsWWkqS7g6xEv8nUfPFyxYjCvTHnO3fOJmINMFcUFic4x7asGGr3q5eW4MQMXmFYaW2eugir9SRGs4ULsvXl6av5rEWvK9iugB8lKXjT8wwSESCRuHHXHiWFAW9Ty/4hJUrXzFVKHDMXyUZyFEflELDu65wGP02ef+rq9SNeq+ZRUuQKMQEjK7HmO23LZi5xcryS20Ez2X5O+utvPm5Y2jIp3jXVU/4rgd++4/LX9VTN+rtbgVjM+ueiyeJPiIguyVQu+0/MHuRdWM1IeD5LrnK6nmGTERi1kmAr1tScQt84nTlVRuWaPq/lGpmRLiElOO6VnMIR6y5HUs9/BmBQHBfS6GJvYy2WuuGxcnA40TLhBKHqq570xtivARF7qEkOS01dbLMRvWJO3NWYs7fzrGhpwNtQ+n8kgZIYjwUmRv4fOQ9JFctuXwr8dOVG1b7GGX9lRx6H9cIadpbCqwO0Vvqi3IiNmwvNPWS6Rr8/3MtJOhORAQCizc2XHj5GYoD7zLGp+CcWsV2OjgW1QQ7nUyuNOC9P4+NAxJZ7MFa8wf7DLXA69zID1M9yTs5fQiMk5H0NGW106KdQUk/TpOZkFHaY9OWMMHwUXXWldRqWAg7W/c7nmmcem8sUn7QYQ="
+
 notifications:
   email: false
   
