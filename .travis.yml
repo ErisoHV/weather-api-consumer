@@ -28,5 +28,6 @@ after_script:
   - cp target/site/jacoco/jacoco.xml src/main/java/jacoco.xml
   - cd src/main/java/
   - ../../../cc-test-reporter after-build -t jacoco --exit-code $TRAVIS_TEST_RESULT
-  - ../../../cc-test-reporter upload-coverage -r $CODE_CLI_TEST_REPORTER_ID
+  - cd ../../../
+  - cc-test-reporter upload-coverage -r $CODE_CLI_TEST_REPORTER_ID
 
