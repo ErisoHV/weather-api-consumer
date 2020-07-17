@@ -12,7 +12,11 @@ public class WeatherServiceException extends RuntimeException {
 	public WeatherServiceException(String msg){
 		super(msg);
 	}
-	
+
+	public <T> WeatherServiceException (ResponseEntity<T> response) {
+		super (buildErrorResponse(response));
+	}
+
 	public static <T> String buildErrorResponse (ResponseEntity<T> response) {
 		if (response == null)	
 			return "Response is null";

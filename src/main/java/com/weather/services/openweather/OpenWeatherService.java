@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.weather.utils.RequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,14 +36,12 @@ public class OpenWeatherService extends WeatherService{
 	@Override
 	public CurrentWeatherStatus getWeather(WeatherRequest request) {
 		Map<String, String> params = new LinkedHashMap<>();
-		if (request.getKey() != null && request.getKey().isEmpty()){
+		if (RequestUtils.isOKWeatherKeyRequest(request)){
 			params.put("id", request.getKey());
-		} else if (request.getLocation().getLatitude() != null 
-				&& request.getLocation().getLongitude() != null){
+		} else if (RequestUtils.isOKLocationRequest(request)){
 			params.put ("lat", String.valueOf(request.getLocation().getLatitude()));
 			params.put ("lon", String.valueOf(request.getLocation().getLongitude()));
-		} else if (request.getLocation().getName() != null 
-				&& !request.getLocation().getName().isEmpty()){
+		} else if (RequestUtils.isOKNameLocationRequest(request)){
 			params.put("q", request.getLocation().getName());
 		} else{
 			throw new IllegalArgumentException("Invalid Location");

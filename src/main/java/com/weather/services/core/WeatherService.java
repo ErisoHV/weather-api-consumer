@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.weather.services.core.interfaces.LocationData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -140,6 +141,15 @@ public abstract class WeatherService {
 				}
 		} catch (RestClientException e) {
 			throw new WeatherServiceException("Rest Client exception, check API key and query params. Response = " + e.getMessage());
+		}
+	}
+
+	protected Location buildResponseToLocation(ResponseEntity<Map> response, LocationData service)
+			throws WeatherServiceException{
+		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
+			return service.responseToLocation(response.getBody());
+		} else{
+			throw new WeatherServiceException(response);
 		}
 	}
 

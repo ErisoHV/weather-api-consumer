@@ -17,6 +17,7 @@ import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.Location;
 import com.weather.model.WeatherRequest;
 import com.weather.services.core.WeatherService;
+import com.weather.utils.RequestUtils;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
@@ -26,15 +27,14 @@ public class DarkSkyService extends WeatherService{
 
 	@Override
 	public CurrentWeatherStatus getWeather(WeatherRequest request) {
-		if (request.getKey() == null || request.getKey().isEmpty())
+		if (!RequestUtils.isOKWeatherKeyRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		List<String> params = new ArrayList<>();
-		params.add(request.getLocation().getLatitude() 
-				+ "," + request.getLocation().getLongitude());
+		params.add(RequestUtils.getCommaSeparatedLocationFromRequest(request));
 		
 		Map<String, String> queryParams = new HashMap<>();
-		if (request.getLanguage() != null && !request.getLanguage().toString().isEmpty())
+		if (RequestUtils.isOKLanguageRequest(request))
 			queryParams.put("lang", request.getLanguage().toString());
 		
 		setApiKey(request.getKey());
@@ -48,7 +48,7 @@ public class DarkSkyService extends WeatherService{
 			}
 			
 		} else{
-			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
+			throw new WeatherServiceException(response);
 		}
 		return null;
 	}

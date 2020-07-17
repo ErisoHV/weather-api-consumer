@@ -19,7 +19,7 @@ import com.weather.model.Location;
 import com.weather.model.WeatherRequest;
 import com.weather.services.core.WeatherService;
 import com.weather.services.core.interfaces.LocationData;
-import com.weather.utils.ResquestUtils;
+import com.weather.utils.RequestUtils;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Service
@@ -60,7 +60,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public List<Location> getLocationsDataByName(WeatherRequest request) {
-		if (!ResquestUtils.isOKWeatherRequest(request))
+		if (!RequestUtils.isOKWeatherKeyRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		Map<String, String> params = new LinkedHashMap<>();
@@ -87,11 +87,11 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public Location getLocationDataByGeoposition(WeatherRequest request) {
-		if (!ResquestUtils.isOKWeatherRequest(request))
+		if (!RequestUtils.isOKWeatherKeyRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		Map<String, String> params = new LinkedHashMap<>();
-		params.put("q", ResquestUtils.getCommaSeparatedLocationFromRequest(request));
+		params.put("q", RequestUtils.getCommaSeparatedLocationFromRequest(request));
 		params.put("details", "false");
 		if (request.getLanguage() != null)
 			params.put("language", request.getLanguage().toString());
@@ -99,11 +99,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		setApiKey(request.getKey());
 		ResponseEntity<Map> response 
 				= getAPIWeatherResponseEntityMap(GEOPOSITION_URL, params);
-		if (response != null && response.getStatusCode().equals(HttpStatus.OK)){
-			return responseToLocation(response.getBody());
-		} else{
-			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
-		}
+		return buildResponseToLocation(response, (LocationData) this);
 	}
 
 	@Override
@@ -140,7 +136,7 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 
 	@Override
 	public CurrentWeatherStatus getWeather(WeatherRequest request) {
-		if (!ResquestUtils.isOKWeatherRequest(request))
+		if (!RequestUtils.isOKWeatherKeyRequest(request))
 			throw new WeatherServiceKeyException();
 		
 		Map<String, String> params = new HashMap<>();
@@ -233,12 +229,10 @@ public class AccuWeatherService extends WeatherService implements LocationData{
 		Map<String, Map<String, Object>> subElement 
 				= (Map<String, Map<String, Object>>) element.get(fields.PrecipitationSummary.toString());
 		if (subElement != null){
-			Map<String, Map<String, Object>> subSubElement = 
-					(Map<String, Map<String, Object>>) element.get((fields.PrecipitationSummary.toString()));
-			if (subSubElement != null && subSubElement.get(fields.Precipitation.toString()) != null){
-				 Map<String, Object> subSubSubElement = 
-						 (Map<String, Object>) subSubElement.get(fields.Precipitation.toString()).get(fields.Metric.toString());
-				 weather.setPrecipitation((double) subSubSubElement.get(fields.Value.toString()));
+			if (subElement != null && subElement.get(fields.Precipitation.toString()) != null){
+				 Map<String, Object> subSubElement =
+						 (Map<String, Object>) subElement.get(fields.Precipitation.toString()).get(fields.Metric.toString());
+				 weather.setPrecipitation((double) subSubElement.get(fields.Value.toString()));
 			}
 		}
 	}

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.weather.exception.WeatherServiceException;
 import com.weather.exception.WeatherServiceKeyException;
 import com.weather.model.CurrentWeatherStatus;
 import com.weather.model.WeatherResponse;
@@ -21,7 +22,7 @@ import com.weather.services.darksky.DarkSkyService;
 public class DarkSkyController {
 	
 	@Autowired
-	CurrentWeatherStatusService service;
+	private CurrentWeatherStatusService service;
 
 	@GetMapping(value="/current", produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<WeatherResponse> getCurrentWeather(@RequestParam("key") String key, @RequestParam("lon") Double longitude, 
@@ -35,7 +36,7 @@ public class DarkSkyController {
 			String message = null;
 			try {
 				current = service.getCurrentDarkSkyService(latitude, longitude, language, key);
-			} catch (WeatherServiceKeyException e) {
+			} catch (WeatherServiceKeyException | WeatherServiceException e) {
 				status = HttpStatus.BAD_REQUEST;
 				message = e.getMessage();
 			}
@@ -43,6 +44,10 @@ public class DarkSkyController {
 			response.setStatus(status);
 			response.setMessage(message);
 			return new ResponseEntity<>(response, status);
+	}
+	
+	public DarkSkyController (CurrentWeatherStatusService service) {
+		this.service = service;
 	}
 	
 }

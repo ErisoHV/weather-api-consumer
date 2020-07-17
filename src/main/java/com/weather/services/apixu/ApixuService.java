@@ -102,7 +102,7 @@ public class ApixuService extends WeatherService implements LocationData{
 				}
 			}
 		} else{
-			throw new WeatherServiceException(WeatherServiceException.buildErrorResponse(response));
+			throw new WeatherServiceException(response);
 		}
 		return locations;
 	}
